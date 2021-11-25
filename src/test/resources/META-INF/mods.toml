@@ -164,5 +164,11 @@ license="LGPL v2.1"
     modId="be_onload_test"
 [[mods]]
     modId="forge_spawnegg_test"
+[[mods]]
+    modId="custom_tooltip_test"
+[[mods]]
+    modId="full_pots_accessor_demo"
+[[mods]]
+    modId="part_entity_test"
 
 # ADD ABOVE THIS LINE
