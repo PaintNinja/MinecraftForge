@@ -20,8 +20,7 @@
 package net.minecraftforge.server.permission;
 
 /**
- * <table><caption>Default Permission Levels</caption>
- * <thead><tr><th>Level</th><th>Player</th><th>OP</th></tr>
+ * <table><thead><tr><th>Level</th><th>Player</th><th>OP</th></tr>
  * </thead><tbody>
  * <tr><td>ALL</td><td>true</td><td>true</td></tr>
  * <tr><td>OP</td><td>false</td><td>true</td></tr>

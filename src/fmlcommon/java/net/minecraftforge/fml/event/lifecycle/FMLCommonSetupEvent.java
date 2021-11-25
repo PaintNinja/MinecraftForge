@@ -23,8 +23,6 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.DeferredWorkQueue;
 import net.minecraftforge.fml.ModLoadingStage;
 
-import java.util.function.Consumer;
-
 /**
  * This is the first of four commonly called events during mod initialization.
  *
@@ -32,7 +30,7 @@ import java.util.function.Consumer;
  *
  * Called after {@link net.minecraftforge.event.RegistryEvent.Register} events have been fired.
  *
- * Either register your listener using {@link net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber} and
+ * Either register your listener using {@link net.minecraftforge.fml.AutomaticEventSubscriber} and
  * {@link net.minecraftforge.eventbus.api.SubscribeEvent} or
  * {@link net.minecraftforge.eventbus.api.IEventBus#addListener(Consumer)} in your constructor.
  *

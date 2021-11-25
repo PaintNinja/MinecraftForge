@@ -34,7 +34,7 @@ public class RecipeWrapper implements Container {
     }
 
     /**
-     * Returns the size of this inventory.
+     * Returns the size of this inventory.  Must be equivalent to {@link #getHeight()} * {@link #getWidth()}.
      */
     @Override
     public int getContainerSize()

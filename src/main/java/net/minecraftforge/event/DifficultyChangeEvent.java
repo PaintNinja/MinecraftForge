@@ -20,14 +20,12 @@
 package net.minecraftforge.event;
 
 import net.minecraft.world.Difficulty;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
 /**
  * DifficultyChangeEvent is fired when difficulty is changing. <br>
  * <br>
- * This event is fired via the {@link ForgeHooks#onDifficultyChange(Difficulty, Difficulty)}.<br>
+ * This event is fired via the {@link ForgeHooks#onDifficultyChange(EnumDifficulty, EnumDifficulty)}.<br>
  * <br>
  * This event does not have a result. {@link HasResult}<br>
  * <br>

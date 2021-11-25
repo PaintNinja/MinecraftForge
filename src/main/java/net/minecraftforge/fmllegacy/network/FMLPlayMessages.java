@@ -25,8 +25,6 @@ import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -47,7 +45,7 @@ public class FMLPlayMessages
 {
     /**
      * Used to spawn a custom entity without the same restrictions as
-     * {@link ClientboundAddEntityPacket} or {@link ClientboundAddMobPacket}
+     * {@link net.minecraft.network.play.server.SSpawnObjectPacket} or {@link net.minecraft.network.play.server.SSpawnMobPacket}
      *
      * To customize how your entity is created clientside (instead of using the default factory provided to the {@link EntityType})
      * see {@link EntityType.Builder#setCustomClientFactory}.

@@ -24,7 +24,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
 import java.util.ArrayList;
@@ -33,8 +32,8 @@ import javax.annotation.Nonnull;
 
 
 /**
- * Exposes the armor or hands inventory of an {@link LivingEntity} as an {@link IItemHandler} using {@link LivingEntity#getItemBySlot(EquipmentSlot)} and
- * {@link LivingEntity#setItemSlot(EquipmentSlot, ItemStack)}.
+ * Exposes the armor or hands inventory of an {@link EntityLivingBase} as an {@link IItemHandler} using {@link EntityLivingBase#getItemStackFromSlot} and
+ * {@link EntityLivingBase#setItemStackToSlot}.
  */
 public abstract class EntityEquipmentInvWrapper implements IItemHandlerModifiable
 {
@@ -44,7 +43,7 @@ public abstract class EntityEquipmentInvWrapper implements IItemHandlerModifiabl
     protected final LivingEntity entity;
 
     /**
-     * The slots exposed by this wrapper, with {@link EquipmentSlot#getIndex()} as the index.
+     * The slots exposed by this wrapper, with {@link EntityEquipmentSlot#index} as the index.
      */
     protected final List<EquipmentSlot> slots;
 

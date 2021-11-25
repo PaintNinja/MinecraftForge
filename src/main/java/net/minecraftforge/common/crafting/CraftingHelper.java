@@ -38,7 +38,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
@@ -158,21 +157,12 @@ public class CraftingHelper
 
     public static ItemStack getItemStack(JsonObject json, boolean readNBT)
     {
-        return getItemStack(json, readNBT, false);
-    }
-
-    public static ItemStack getItemStack(JsonObject json, boolean readNBT, boolean disallowsAirInRecipe)
-    {
         String itemName = GsonHelper.getAsString(json, "item");
-        ResourceLocation itemKey = new ResourceLocation(itemName);
 
-        if (!ForgeRegistries.ITEMS.containsKey(itemKey))
+        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName));
+
+        if (item == null)
             throw new JsonSyntaxException("Unknown item '" + itemName + "'");
-
-        Item item = ForgeRegistries.ITEMS.getValue(itemKey);
-
-        if (disallowsAirInRecipe && item == Items.AIR)
-            throw new JsonSyntaxException("Invalid item: " + itemName);
 
         if (readNBT && json.has("nbt"))
         {

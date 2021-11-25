@@ -21,7 +21,6 @@ package net.minecraftforge.event.entity.player;
 
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 
 /**
@@ -63,7 +62,7 @@ public class PlayerXpEvent extends PlayerEvent
     }
 
     /**
-     * This event is fired when the player's experience changes through the {@link Player#giveExperiencePoints(int)} method.
+     * This event is fired when the player's experience changes through the {@link PlayerEntity#giveExperiencePoints} method.
      * It can be cancelled, and no further processing will be done.
      */
     @Cancelable
@@ -91,7 +90,7 @@ public class PlayerXpEvent extends PlayerEvent
     }
 
     /**
-     * This event is fired when the player's experience level changes through the {@link Player#giveExperienceLevels(int)} method.
+     * This event is fired when the player's experience level changes through the {@link PlayerEntity#addExperienceLevel} method.
      * It can be cancelled, and no further processing will be done.
      */
     @Cancelable

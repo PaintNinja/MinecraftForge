@@ -82,7 +82,7 @@ public class ToolActions
     /**
      *  Used during player attack to figure out if a sweep attack should be performed
      *  
-     *  @see IForgeItem#getSweepHitBox
+     *  @see {@link IForgeItem#getSweepHitBox}
      */
     public static final ToolAction SWORD_SWEEP = ToolAction.get("sword_sweep");
 

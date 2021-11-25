@@ -158,7 +158,7 @@ public class NetworkEvent extends Event
     public static class Context
     {
         /**
-         * The {@link Connection} for this message.
+         * The {@link NetworkManager} for this message.
          */
         private final Connection networkManager;
 

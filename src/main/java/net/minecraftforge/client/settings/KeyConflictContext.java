@@ -20,7 +20,6 @@
 package net.minecraftforge.client.settings;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 
 public enum KeyConflictContext implements IKeyConflictContext
 {
@@ -43,7 +42,7 @@ public enum KeyConflictContext implements IKeyConflictContext
     },
 
     /**
-     * Gui key bindings are only used when a {@link Screen} is open.
+     * Gui key bindings are only used when a {@link GuiScreen} is open.
      */
     GUI {
         @Override
@@ -60,7 +59,7 @@ public enum KeyConflictContext implements IKeyConflictContext
     },
 
     /**
-     * In-game key bindings are only used when a {@link Screen} is not open.
+     * In-game key bindings are only used when a {@link GuiScreen} is not open.
      */
     IN_GAME {
         @Override

@@ -98,8 +98,8 @@ public final class ForgeLootTableProvider extends LootTableProvider {
     }
 
     private boolean findAndReplaceInLootPool(LootPool lootPool, Item from, ToolAction toolAction) {
-        LootPoolEntryContainer[] lootEntries = ObfuscationReflectionHelper.getPrivateValue(LootPool.class, lootPool, "f_7902" +"3_");
-        LootItemCondition[] lootConditions = ObfuscationReflectionHelper.getPrivateValue(LootPool.class, lootPool, "f_7902" + "4_");
+        List<LootPoolEntryContainer> lootEntries = ObfuscationReflectionHelper.getPrivateValue(LootPool.class, lootPool, "f_7902" +"3_");
+        List<LootItemCondition> lootConditions = ObfuscationReflectionHelper.getPrivateValue(LootPool.class, lootPool, "f_7902" + "4_");
         boolean found = false;
 
         if (lootEntries == null) {
@@ -118,16 +118,16 @@ public final class ForgeLootTableProvider extends LootTableProvider {
             throw new IllegalStateException(LootPool.class.getName() + " is missing field f_7902" + "4_");
         }
 
-        for (int i = 0; i < lootConditions.length; i++) {
-            LootItemCondition lootCondition = lootConditions[i];
+        for (int i = 0; i < lootConditions.size(); i++) {
+            LootItemCondition lootCondition = lootConditions.get(i);
             if (lootCondition instanceof MatchTool && checkMatchTool((MatchTool) lootCondition, from)) {
-                lootConditions[i] = CanToolPerformAction.canToolPerformAction(toolAction).build();
+                lootConditions.set(i, CanToolPerformAction.canToolPerformAction(toolAction).build());
                 found = true;
             } else if (lootCondition instanceof InvertedLootItemCondition) {
                 LootItemCondition invLootCondition = ObfuscationReflectionHelper.getPrivateValue(InvertedLootItemCondition.class, (InvertedLootItemCondition) lootCondition, "f_8168" + "1_");
 
                 if (invLootCondition instanceof MatchTool && checkMatchTool((MatchTool) invLootCondition, from)) {
-                    lootConditions[i] = InvertedLootItemCondition.invert(CanToolPerformAction.canToolPerformAction(toolAction)).build();
+                    lootConditions.set(i, InvertedLootItemCondition.invert(CanToolPerformAction.canToolPerformAction(toolAction)).build());
                     found = true;
                 } else if (invLootCondition instanceof AlternativeLootItemCondition && findAndReplaceInAlternative((AlternativeLootItemCondition) invLootCondition, from, toolAction)) {
                     found = true;

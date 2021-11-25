@@ -20,7 +20,6 @@
 package net.minecraftforge.common.util;
 
 import javax.annotation.Nonnull;
-import java.util.function.Predicate;
 
 /**
  * Equivalent to {@link Predicate}, except with nonnull contract.

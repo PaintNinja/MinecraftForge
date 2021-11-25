@@ -22,8 +22,6 @@ package net.minecraftforge.fml.event.lifecycle;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingStage;
 
-import java.util.function.Predicate;
-
 /**
  * This is the fourth of four commonly called events during mod core startup.
  *

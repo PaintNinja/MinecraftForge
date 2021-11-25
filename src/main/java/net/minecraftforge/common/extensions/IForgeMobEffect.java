@@ -36,7 +36,7 @@ public interface IForgeMobEffect
     /**
      * Get a fresh list of items that can cure this Potion.
      * All new PotionEffects created from this Potion will call this to initialize the default curative items
-     * @see MobEffectInstance#getCurativeItems()
+     * @see PotionEffect#getCurativeItems
      * @return A list of items that can cure this Potion
      */
     default List<ItemStack> getCurativeItems() {

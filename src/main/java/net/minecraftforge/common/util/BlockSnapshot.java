@@ -22,7 +22,6 @@ package net.minecraftforge.common.util;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.nbt.CompoundTag;
@@ -136,7 +135,7 @@ public class BlockSnapshot
         BlockState current = getCurrentBlock();
         BlockState replaced = getReplacedBlock();
 
-        int flags = notifyNeighbors ? Block.UPDATE_ALL : Block.UPDATE_CLIENTS;
+        int flags = notifyNeighbors ? Constants.BlockFlags.DEFAULT : Constants.BlockFlags.BLOCK_UPDATE;
 
         if (current != replaced)
         {

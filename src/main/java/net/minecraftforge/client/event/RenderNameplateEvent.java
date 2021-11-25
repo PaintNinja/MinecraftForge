@@ -24,7 +24,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -45,7 +44,7 @@ import net.minecraftforge.eventbus.api.Event;
  * <br>
  * This event has a result. {@link HasResult}. <br>
  * ALLOW will force-render name plate/tag, DEFAULT will ignore the hook and continue using the vanilla check
- * and DENY will prevent name plate/tag from rendering<br>
+ * & DENY will prevent name plate/tag from rendering<br>
  * <br>
  * This event is fired on the {@link MinecraftForge#EVENT_BUS}.
  **/

@@ -115,7 +115,8 @@ public interface IForgeItemStack extends ICapabilitySerializable<CompoundTag>
 
     /**
      * Queries if an item can perform the given action.
-     * See {@link ToolActions} for a description of each stock action
+     * See {@link net.minecraftforge.common.ToolActions} for a description of each stock action
+     * @param stack The stack being used
      * @param toolAction The action being queried
      * @return True if the stack can perform the action
      */
@@ -156,7 +157,7 @@ public interface IForgeItemStack extends ICapabilitySerializable<CompoundTag>
      * applies specifically to enchanting an item in the enchanting table and is
      * called when retrieving the list of possible enchantments for an item.
      * Enchantments may additionally (or exclusively) be doing their own checks in
-     * {@link Enchantment#canApplyAtEnchantingTable(ItemStack)};
+     * {@link net.minecraft.enchantment.Enchantment#canApplyAtEnchantingTable(ItemStack)};
      * check the individual implementation for reference. By default this will check
      * if the enchantment type is valid for this item type.
      *
@@ -181,7 +182,7 @@ public interface IForgeItemStack extends ICapabilitySerializable<CompoundTag>
     /**
      * Override this to set a non-default armor slot for an ItemStack, but <em>do
      * not use this to get the armor slot of said stack; for that, use
-     * {@link LivingEntity#getEquipmentSlotForItem(ItemStack)}.</em>
+     * {@link net.minecraft.world.entity.LivingEntity#getEquipmentSlotForItem(ItemStack)}.</em>
      *
      * @return the armor slot of the ItemStack, or {@code null} to let the default
      *         vanilla logic as per {@code LivingEntity.getSlotForItemStack(stack)}
@@ -199,7 +200,7 @@ public interface IForgeItemStack extends ICapabilitySerializable<CompoundTag>
      * @param shield   The shield in question
      * @param entity   The LivingEntity holding the shield
      * @param attacker The LivingEntity holding the ItemStack
-     * @return True if this ItemStack can disable the shield in question.
+     * @retrun True if this ItemStack can disable the shield in question.
      */
     default boolean canDisableShield(ItemStack shield, LivingEntity entity, LivingEntity attacker)
     {
@@ -286,7 +287,7 @@ public interface IForgeItemStack extends ICapabilitySerializable<CompoundTag>
     }
 
     /**
-     * Called every tick from {@code Horse#playGallopSound(SoundEvent)} on the item in the
+     * Called every tick from {@link HorseEntity#onUpdate()} on the item in the
      * armor slot.
      *
      * @param world the world the horse is in

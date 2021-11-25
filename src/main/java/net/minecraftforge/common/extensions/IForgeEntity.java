@@ -21,9 +21,6 @@ package net.minecraftforge.common.extensions;
 
 import java.util.Collection;
 import javax.annotation.Nullable;
-
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobCategory;
@@ -144,7 +141,8 @@ public interface IForgeEntity extends ICapabilitySerializable<CompoundTag>
     /**
      * Gets whether this entity has been added to a world (for tracking). Specifically
      * between the times when an entity is added to a world and the entity being removed
-     * from the world's tracked lists.
+     * from the world's tracked lists. See {@link World#onEntityAdded(Entity)} and
+     * {@link World#onEntityRemoved(Entity)}.
      *
      * @return True if this entity is being tracked by a world
      */
@@ -175,7 +173,7 @@ public interface IForgeEntity extends ICapabilitySerializable<CompoundTag>
     /**
      * This is used to specify that your entity has multiple individual parts, such as the Vanilla Ender Dragon.
      *
-     * See {@link EnderDragon} for an example implementation.
+     * See {@link net.minecraft.entity.boss.dragon.EnderDragonEntity} for an example implementation.
      * @return true if this is a multipart entity.
      */
     default boolean isMultipartEntity()
@@ -192,7 +190,7 @@ public interface IForgeEntity extends ICapabilitySerializable<CompoundTag>
      *
      * Only used if {@link #isMultipartEntity()} returns true.
      *
-     * See {@link EnderDragon} for an example implementation.
+     * See {@link net.minecraft.entity.boss.dragon.EnderDragonEntity} for an example implementation.
      * @return The child parts of this entity. The value to be returned here should be cached.
      */
     @Nullable

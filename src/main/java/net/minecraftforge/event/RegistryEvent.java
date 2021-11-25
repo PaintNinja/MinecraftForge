@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import net.minecraftforge.fml.event.IModBusEvent;
-import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.commons.lang3.Validate;
 
 import com.google.common.collect.ImmutableList;
@@ -43,7 +42,7 @@ public class RegistryEvent<T extends IForgeRegistryEntry<T>> extends GenericEven
         super(clazz);
     }
     /**
-     * Register new registries when you receive this event, through the {@link RegistryBuilder}
+     * Register new registries when you receive this event, through the {@link RecipeBuilder}
      */
     public static class NewRegistry extends net.minecraftforge.eventbus.api.Event implements IModBusEvent
     {
