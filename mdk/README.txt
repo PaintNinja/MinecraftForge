@@ -30,8 +30,14 @@ If you prefer to use Visual Studio Code:
 1. Install the following extensions from the VS Code marketplace:
    - Extension Pack for Java (https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack)
    - Gradle for Java (https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-gradle)
-2. Open the folder in VS Code and have it import.
-3. Run the following command: `./gradlew genVSCodeRuns` to generate the launch configuration.
+2. Change the following settings:
+   - Java › Eclipse: Download Sources = enable
+   - Java: Max Concurrent Builds = (number of CPU threads you have)
+2. Run the following commands: `./gradlew buildNeeded` and then `./gradlew eclipse`
+4. Open the folder in VS Code.
+5. Run the following command: `./gradlew genVSCodeRuns` to generate the launch configuration.
+Note: VS Code may show a "Java build status" process in the background, this is for IntelliSense and can
+be safely ignored - your mod's Gradle builds are ran separately from this.
 
 If at any point you are missing libraries in your IDE, or you've run into problems you can 
 run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
