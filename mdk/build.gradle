@@ -24,12 +24,14 @@ println "Java: ${System.getProperty('java.version')}, JVM: ${System.getProperty(
 minecraft {
     // The mappings can be changed at any time and must be in the following format.
     // Channel:   Version:
-    // snapshot   YYYYMMDD   Snapshot are built nightly.
-    // stable     #          Stables are built at the discretion of the MCP team.
-    // official   MCVersion  Official field/method names from Mojang mapping files
+    // official   MCVersion                   Official field/method names from Mojang mapping files
+    // parchment  ParchmentVersion-MCVersion  Open community-sourced parameter names and javadocs on top of official
     //
-    // You must be aware of the Mojang license when using the 'official' mappings.
+    // You must be aware of the Mojang license when using the 'official' or 'parchment' mappings.
     // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
+    //
+    // Parchment is an unofficial project, separate from MinecraftForge
+    // Additional setup is needed in order to use their mappings: https://github.com/ParchmentMC/Parchment/wiki/Getting-Started
     //
     // Use non-default mappings at your own risk. They may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
