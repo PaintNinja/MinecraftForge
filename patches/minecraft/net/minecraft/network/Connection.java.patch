@@ -25,11 +25,9 @@
        }
  
        if (this.f_129468_.eventLoop().inEventLoop()) {
-@@ -277,7 +_,9 @@
-    }
+@@ -278,6 +_,7 @@
  
     public static Connection m_178300_(InetSocketAddress p_178301_, boolean p_178302_) {
-+      if (p_178301_.getAddress() instanceof java.net.Inet6Address) System.setProperty("java.net.preferIPv4Stack", "false");
        final Connection connection = new Connection(PacketFlow.CLIENTBOUND);
 +      connection.activationHandler = net.minecraftforge.network.NetworkHooks::registerClientLoginChannel;
        Class<? extends SocketChannel> oclass;
