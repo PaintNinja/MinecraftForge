@@ -384,7 +384,8 @@ def sharedFmlonlyForge = { Project prj ->
 
                 property 'nativesDirectory', '{natives}'
 
-                args '-Djava.net.preferIPv6Addresses=system'
+                jvmArgs '-Djava.net.preferIPv6Addresses=system'
+
                 args '--launchTarget', "${launchPrefix}clientuserdev"
                 args '--version', 'MOD_DEV'
                 args '--assetIndex', '{asset_index}'
@@ -395,7 +396,8 @@ def sharedFmlonlyForge = { Project prj ->
                 environment 'MOD_CLASSES', '{source_roots}'
                 environment 'MCP_MAPPINGS', '{mcp_mappings}'
 
-                args '-Djava.net.preferIPv6Addresses=system'
+                jvmArgs '-Djava.net.preferIPv6Addresses=system'
+
                 args '--launchTarget', "${launchPrefix}serveruserdev"
             }
 
