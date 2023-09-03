@@ -9,6 +9,8 @@ import net.minecraftforge.fml.loading.FMLConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.LockSupport;
 
@@ -91,12 +93,27 @@ public class ModWorkManager {
         return new WrappingExecutor(executor);
     }
 
-    private static ForkJoinPool parallelThreadPool;
+    private static ExecutorService parallelThreadPool;
     public static Executor parallelExecutor() {
         if (parallelThreadPool == null) {
-            final int loadingThreadCount = FMLConfig.getIntConfigValue(FMLConfig.ConfigValue.MAX_THREADS);
-            LOGGER.debug(LOADING, "Using {} threads for parallel mod-loading", loadingThreadCount);
-            parallelThreadPool = new ForkJoinPool(loadingThreadCount, ModWorkManager::newForkJoinWorkerThread, null, false);
+            if (FMLConfig.getBoolConfigValue(FMLConfig.ConfigValue.VIRTUAL_THREADS) && Runtime.version().feature() >= 19) {
+                try {
+                    parallelThreadPool = (ExecutorService) MethodHandles.lookup()
+                            .findStatic(Executors.class, "newVirtualThreadPerTaskExecutor", MethodType.methodType(ExecutorService.class))
+                            .invokeExact();
+                    LOGGER.debug(LOADING, "Using virtual threads for parallel mod-loading (experimental)");
+                } catch (Throwable e) {
+                    LOGGER.warn(LOADING, "Unable to use virtual threads for parallel mod-loading, falling back to normal threads...");
+                    LOGGER.warn(LOADING, "", e);
+                }
+            }
+
+            if (parallelThreadPool == null) {
+                final int loadingThreadCount = FMLConfig.getIntConfigValue(FMLConfig.ConfigValue.MAX_THREADS);
+                LOGGER.debug(LOADING, "Using {} threads for parallel mod-loading", loadingThreadCount);
+
+                parallelThreadPool = new ForkJoinPool(loadingThreadCount, ModWorkManager::newForkJoinWorkerThread, null, false);
+            }
         }
         return parallelThreadPool;
     }

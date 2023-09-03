@@ -36,13 +36,14 @@ public class FMLConfig
         EARLY_WINDOW_FBSCALE("earlyWindowFBScale", 1, "Early window framebuffer scale"),
         EARLY_WINDOW_MAXIMIZED("earlyWindowMaximized", Boolean.FALSE, "Early window starts maximized"),
         EARLY_WINDOW_SKIP_GL_VERSIONS("earlyWindowSkipGLVersions", List.of(), "Skip specific GL versions, may help with buggy graphics card drivers"),
-        EARLY_WINDOW_SQUIR("earlyWindowSquir", Boolean.FALSE, "Squir?")
+        EARLY_WINDOW_SQUIR("earlyWindowSquir", Boolean.FALSE, "Squir?"),
+        VIRTUAL_THREADS("virtualThreads", Boolean.FALSE, "(Experimental) Enable virtual threads for mod loading when available. Requires Java 21+ (or Java 19+ with preview features enabled)"),
         ;
 
         private final String entry;
         private final Object defaultValue;
         private final String comment;
-        private final Class<?> valueType;
+        //private final Class<?> valueType;
         private final Function<Object, Object> entryFunction;
 
         ConfigValue(final String entry, final Object defaultValue, final String comment) {
@@ -52,7 +53,7 @@ public class FMLConfig
             this.entry = entry;
             this.defaultValue = defaultValue;
             this.comment = comment;
-            this.valueType = defaultValue.getClass();
+            //this.valueType = defaultValue.getClass();
             this.entryFunction = entryFunction;
         }
 
