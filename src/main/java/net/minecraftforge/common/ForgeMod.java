@@ -53,6 +53,7 @@ import net.minecraftforge.common.data.ForgeItemTagsProvider;
 import net.minecraftforge.common.data.ForgeLootTableProvider;
 import net.minecraftforge.common.data.ForgeRecipeProvider;
 import net.minecraftforge.common.data.ForgeSpriteSourceProvider;
+import net.minecraftforge.common.data.ForgeStructureTagsProvider;
 import net.minecraftforge.common.data.VanillaSoundDefinitionsProvider;
 import net.minecraftforge.common.loot.CanToolPerformAction;
 import net.minecraftforge.common.loot.LootTableIdCondition;
@@ -472,6 +473,7 @@ public class ForgeMod {
         gen.addProvider(event.includeServer(), new ForgeRecipeProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new ForgeLootTableProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new ForgeBiomeTagsProvider(packOutput, lookupProvider, existingFileHelper));
+        gen.addProvider(event.includeServer(), new ForgeStructureTagsProvider(packOutput, lookupProvider, existingFileHelper));
 
         gen.addProvider(event.includeClient(), new ForgeSpriteSourceProvider(packOutput, existingFileHelper));
         gen.addProvider(event.includeClient(), new VanillaSoundDefinitionsProvider(packOutput, existingFileHelper));
