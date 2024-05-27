@@ -258,10 +258,10 @@ public final class ForgeBiomeTagsProvider extends BiomeTagsProvider {
     }
 
     private TagAppender<Biome> tagWithOptionalLegacy(TagKey<Biome> tag) {
-        return tag(tag).addOptionalTag(new ResourceLocation("forge", tag.location().getPath()));
+        return tag(tag).addOptionalTag(forgeRl(tag.location().getPath()));
     }
 
-    private ResourceLocation forgeRl(String path) {
+    private static ResourceLocation forgeRl(String path) {
         return new ResourceLocation("forge", path);
     }
 
