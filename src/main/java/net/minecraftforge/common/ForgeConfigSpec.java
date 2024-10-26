@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 import net.minecraftforge.fml.Logging;
 import net.minecraftforge.fml.config.IConfigSpec;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
@@ -37,7 +36,6 @@ import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.electronwill.nightconfig.core.file.FileConfig;
 import com.electronwill.nightconfig.core.utils.UnmodifiableConfigWrapper;
 import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,7 +57,6 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
     private static final Pattern WINDOWS_NEWLINE = Pattern.compile("\r\n");
     private static final Joiner LINE_JOINER = Joiner.on("\n");
     private static final Joiner DOT_JOINER = Joiner.on(".");
-    private static final Splitter DOT_SPLITTER = Splitter.on('.');
 
     private ForgeConfigSpec(UnmodifiableConfig storage, UnmodifiableConfig values, Map<List<String>, String> levelComments, Map<List<String>, String> levelTranslationKeys) {
         super(storage);
