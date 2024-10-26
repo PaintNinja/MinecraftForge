@@ -94,8 +94,6 @@ public class ForgeConfig {
      * Client specific configuration - only loaded clientside from forge-client.toml
      */
     public static class Client {
-        public final BooleanValue alwaysSetupTerrainOffThread;
-
         public final BooleanValue experimentalForgeLightPipelineEnabled;
 
         public final BooleanValue showLoadWarnings;
@@ -107,13 +105,6 @@ public class ForgeConfig {
         Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Client only settings, mostly things related to rendering")
                    .push("client");
-
-            alwaysSetupTerrainOffThread = builder
-                .comment("Enable Forge to queue all chunk updates to the Chunk Update thread.",
-                        "May increase FPS significantly, but may also cause weird rendering lag.",
-                        "Not recommended for computers without a significant number of cores available.")
-                .translation("forge.configgui.alwaysSetupTerrainOffThread")
-                .define("alwaysSetupTerrainOffThread", false);
 
             experimentalForgeLightPipelineEnabled = builder
                 .comment("EXPERIMENTAL: Enable the Forge block rendering pipeline - fixes the lighting of custom models.")
