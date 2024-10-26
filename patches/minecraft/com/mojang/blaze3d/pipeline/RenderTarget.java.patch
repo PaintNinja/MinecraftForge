@@ -11,13 +11,11 @@
              }
  
              this.setFilterMode(9728, true);
-@@ -107,7 +_,8 @@
-             GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
+@@ -108,6 +_,7 @@
              GlStateManager._glFramebufferTexture2D(36160, 36064, 3553, this.colorTextureId, 0);
              if (this.useDepth) {
--                GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthBufferId, 0);
-+                if (stencilEnabled) GlStateManager._glFramebufferTexture2D(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER, org.lwjgl.opengl.GL30.GL_DEPTH_STENCIL_ATTACHMENT, 3553, this.depthBufferId, 0);
-+                else GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthBufferId, 0); // GL_DEPTH_ATTACHMENT
+                 GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthBufferId, 0);
++                if (stencilEnabled) GlStateManager._glFramebufferTexture2D(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER, org.lwjgl.opengl.GL30.GL_STENCIL_ATTACHMENT, 3553, this.depthBufferId, 0);
              }
  
              this.checkStatus();
