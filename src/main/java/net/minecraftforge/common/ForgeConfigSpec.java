@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -817,8 +816,6 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
     }
 
     public static class ConfigValue<T> implements Supplier<T> {
-        private static final boolean USE_CACHES = true;
-
         private final Builder parent;
         private final List<String> path;
         private final Supplier<T> defaultSupplier;
@@ -849,27 +846,10 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
          */
         @Override
         public T get() {
-            Objects.requireNonNull(spec, "Cannot get config value before spec is built");
-            // TODO: Remove this dev-time check so this errors out on both production and dev
-            // This is dev-time-only in 1.19.x, to avoid breaking already published mods while forcing devs to fix their errors
-            if (!FMLEnvironment.production) {
-                // When the above if-check is removed, change message to "Cannot get config value before config is loaded"
-                if (spec.childConfig == null) {
-                    throw new IllegalStateException("""
-                        Cannot get config value before config is loaded.
-                        This error is currently only thrown in the development environment, to avoid breaking published mods.
-                        In a future version, this will also throw in the production environment.
-                        """);
-                }
-            }
+            validate();
 
-            if (spec.childConfig == null)
-                return defaultSupplier.get();
-
-            if (USE_CACHES && cachedValue == null)
+            if (cachedValue == null)
                 cachedValue = getRaw(spec.childConfig, path, defaultSupplier);
-            else if (!USE_CACHES)
-                return getRaw(spec.childConfig, path, defaultSupplier);
 
             return cachedValue;
         }
@@ -904,6 +884,12 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
 
         public void clearCache() {
             this.cachedValue = null;
+        }
+
+        protected void validate() {
+            Objects.requireNonNull(spec, "Cannot get config value before spec is built");
+            if (spec.childConfig == null)
+                throw new IllegalStateException("Cannot get config value before config is loaded.");
         }
     }
 
