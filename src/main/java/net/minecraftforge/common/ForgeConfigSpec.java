@@ -1119,6 +1119,9 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
     }
 
     private static List<String> split(String path) {
-        return DOT_SPLITTER.splitToStream(path).toList();
+        if (path.contains("."))
+            throw new IllegalArgumentException("Path cannot contain '.' - use nested push/pop calls or List.of() instead");
+
+        return Collections.singletonList(path);
     }
 }
