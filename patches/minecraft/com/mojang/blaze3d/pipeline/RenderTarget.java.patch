@@ -11,18 +11,13 @@
              }
  
              this.setFilterMode(9728, true);
-@@ -106,8 +_,13 @@
-             GlStateManager._texImage2D(3553, 0, 32856, this.width, this.height, 0, 6408, 5121, null);
+@@ -107,7 +_,8 @@
              GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
              GlStateManager._glFramebufferTexture2D(36160, 36064, 3553, this.colorTextureId, 0);
--            if (this.useDepth) {
-+            if (this.useDepth && !stencilEnabled) {
-                 GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthBufferId, 0);
-+            } else if(this.useDepth && net.minecraftforge.common.ForgeConfig.CLIENT.useCombinedDepthStencilAttachment.get()) {
-+                GlStateManager._glFramebufferTexture2D(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER, org.lwjgl.opengl.GL30.GL_DEPTH_STENCIL_ATTACHMENT, 3553, this.depthBufferId, 0);
-+            } else if (this.useDepth) {
-+                GlStateManager._glFramebufferTexture2D(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER, org.lwjgl.opengl.GL30.GL_DEPTH_ATTACHMENT, 3553, this.depthBufferId, 0);
-+                GlStateManager._glFramebufferTexture2D(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER, org.lwjgl.opengl.GL30.GL_STENCIL_ATTACHMENT, 3553, this.depthBufferId, 0);
+             if (this.useDepth) {
+-                GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthBufferId, 0);
++                if (stencilEnabled) GlStateManager._glFramebufferTexture2D(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER, org.lwjgl.opengl.GL30.GL_DEPTH_STENCIL_ATTACHMENT, 3553, this.depthBufferId, 0);
++                else GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthBufferId, 0); // GL_DEPTH_ATTACHMENT
              }
  
              this.checkStatus();

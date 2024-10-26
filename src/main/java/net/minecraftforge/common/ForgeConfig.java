@@ -98,8 +98,6 @@ public class ForgeConfig {
 
         public final BooleanValue showLoadWarnings;
 
-        public final BooleanValue useCombinedDepthStencilAttachment;
-
         Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Client only settings, mostly things related to rendering")
                    .push("client");
@@ -113,11 +111,6 @@ public class ForgeConfig {
                 .comment("When enabled, Forge will show any warnings that occurred during loading.")
                 .translation("forge.configgui.showLoadWarnings")
                 .define("showLoadWarnings", true);
-
-            useCombinedDepthStencilAttachment = builder
-                    .comment("Set to true to use a combined DEPTH_STENCIL attachment instead of two separate ones.")
-                    .translation("forge.configgui.useCombinedDepthStencilAttachment")
-                    .define("useCombinedDepthStencilAttachment", false);
 
             builder.pop();
         }
