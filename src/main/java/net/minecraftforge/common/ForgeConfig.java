@@ -100,8 +100,6 @@ public class ForgeConfig {
 
         public final BooleanValue useCombinedDepthStencilAttachment;
 
-        public final BooleanValue calculateAllNormals;
-
         Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Client only settings, mostly things related to rendering")
                    .push("client");
@@ -121,24 +119,11 @@ public class ForgeConfig {
                     .translation("forge.configgui.useCombinedDepthStencilAttachment")
                     .define("useCombinedDepthStencilAttachment", false);
 
-            calculateAllNormals = builder
-                    .comment("During block model baking, manually calculates the normal for all faces.",
-                            "This was the default behavior of forge between versions 31.0 and 47.1.",
-                            "May result in differences between vanilla rendering and forge rendering.",
-                            "Will only produce differences for blocks that contain non-axis aligned faces.",
-                            "You will need to reload your resources to see results.")
-                    .translation("forge.configgui.calculateAllNormals")
-                    .define("calculateAllNormals", false);
-
             builder.pop();
         }
 
         // Allow these to be called before the config is loaded because its used before loading the error screens.
         // Prevents a ton of spam when an error screen is displayed.
-        public final boolean calculateAllNormals() {
-            return clientSpec.isLoaded() ? calculateAllNormals.get() : calculateAllNormals.getDefault();
-        }
-
         public final boolean showLoadWarnings() {
             return clientSpec.isLoaded() ? showLoadWarnings.get() : showLoadWarnings.getDefault();
         }
