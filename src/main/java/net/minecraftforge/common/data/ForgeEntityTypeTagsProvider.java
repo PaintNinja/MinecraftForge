@@ -58,6 +58,46 @@ public final class ForgeEntityTypeTagsProvider extends EntityTypeTagsProvider {
             EntityType.SPRUCE_BOAT,
             EntityType.SPRUCE_CHEST_BOAT
         );
+        tag(ANIMALS).add(
+                EntityType.ARMADILLO,
+                EntityType.AXOLOTL,
+                EntityType.BEE,
+                EntityType.CAMEL,
+                EntityType.CAT,
+                EntityType.CHICKEN,
+                EntityType.COD,
+                EntityType.COW,
+                EntityType.DOLPHIN,
+                EntityType.DONKEY,
+                EntityType.FOX,
+                EntityType.FROG,
+                EntityType.GLOW_SQUID,
+                EntityType.GOAT,
+                EntityType.HOGLIN,
+                EntityType.HORSE,
+                EntityType.LLAMA,
+                EntityType.MOOSHROOM,
+                EntityType.MULE,
+                EntityType.OCELOT,
+                EntityType.PANDA,
+                EntityType.PARROT,
+                EntityType.PIG,
+                EntityType.POLAR_BEAR,
+                EntityType.PUFFERFISH,
+                EntityType.RABBIT,
+                EntityType.SALMON,
+                EntityType.SHEEP,
+                EntityType.SKELETON_HORSE,
+                EntityType.SNIFFER,
+                EntityType.SQUID,
+                EntityType.STRIDER,
+                EntityType.TADPOLE,
+                EntityType.TRADER_LLAMA,
+                EntityType.TROPICAL_FISH,
+                EntityType.TURTLE,
+                EntityType.WOLF,
+                EntityType.ZOMBIE_HORSE
+        );
         tag(CAPTURING_NOT_SUPPORTED);
         tag(TELEPORTING_NOT_SUPPORTED);
 
