@@ -49,7 +49,6 @@ public class RuntimeEnumExtender implements ILaunchPluginService {
 
     @Override
     public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty) {
-        System.out.println(classType.getInternalName());
         if (isEmpty || !classType.getInternalName().startsWith("net/minecraft/"))
             return NAY;
 
