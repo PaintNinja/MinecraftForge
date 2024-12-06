@@ -25,6 +25,7 @@ import net.minecraftforge.common.world.StructureModifier;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.common.world.BiomeModifier;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.ConnectionType;
 import net.minecraftforge.network.NetworkContext;
 import net.minecraftforge.network.NetworkRegistry;
@@ -81,12 +82,12 @@ public class ServerLifecycleHooks {
     }
 
     public static boolean handleServerStarting(final MinecraftServer server) {
-        DistExecutor.runWhenOn(Dist.DEDICATED_SERVER, ()->()->{
+        if (FMLEnvironment.dist.isDedicatedServer()) {
             LanguageHook.loadLanguagesOnServer(server);
             // GameTestServer requires the gametests to be registered earlier, so it is done in main and should not be done twice.
             if (!(server instanceof GameTestServer))
                 net.minecraftforge.gametest.ForgeGameTestHooks.registerGametests();
-        });
+        };
         PermissionAPI.initializePermissionAPI();
         return !MinecraftForge.EVENT_BUS.post(new ServerStartingEvent(server));
     }
