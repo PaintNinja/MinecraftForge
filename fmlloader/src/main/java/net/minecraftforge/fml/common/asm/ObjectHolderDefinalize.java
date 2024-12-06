@@ -63,7 +63,7 @@ public class ObjectHolderDefinalize implements ILaunchPluginService {
             return NAY;
 
         // Vanilla classes that don't have object holders
-        if (internalName.startsWith("com/mojang"))
+        if (internalName.startsWith("com/mojang/"))
             return NAY;
 
         // ...except specific ones we added to the VANILLA_OBJECT_HOLDERS map
