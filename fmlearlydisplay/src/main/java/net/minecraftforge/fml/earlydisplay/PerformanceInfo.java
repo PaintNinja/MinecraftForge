@@ -13,10 +13,10 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 
 public class PerformanceInfo {
+    private static final MemoryMXBean MEMORY_BEAN = ManagementFactory.getMemoryMXBean();
 
     private final boolean showCPUUsage;
     private final OperatingSystemMXBean osBean;
-    private final MemoryMXBean memoryBean;
 
     private float memory;
     private String text;
@@ -24,11 +24,10 @@ public class PerformanceInfo {
     PerformanceInfo() {
         showCPUUsage = FMLConfig.getBoolConfigValue(FMLConfig.ConfigValue.EARLY_WINDOW_SHOW_CPU);
         osBean = showCPUUsage ? ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class) : null;
-        memoryBean = ManagementFactory.getMemoryMXBean();
     }
 
     void update() {
-        final MemoryUsage heapusage = memoryBean.getHeapMemoryUsage();
+        final MemoryUsage heapusage = MEMORY_BEAN.getHeapMemoryUsage();
         memory = (float) heapusage.getUsed() / heapusage.getMax();
 
         if (!showCPUUsage) {
