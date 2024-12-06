@@ -75,7 +75,7 @@ public class RenderElement {
         List<SimpleFont.DisplayText> texts = new ArrayList<>();
         for (int i = messages.size() - 1; i >= 0; i--) {
             final StartupNotificationManager.AgeMessage pair = messages.get(i);
-            final float fade = clamp((4000.0f - (float) pair.age() - ( i - 4 ) * 1000.0f) / 5000.0f, 0.0f, 1.0f);
+            final float fade = Math.clamp((4000.0f - (float) pair.age() - ( i - 4 ) * 1000.0f) / 5000.0f, 0.0f, 1.0f);
             if (fade <0.01f) continue;
             Message msg = pair.message();
             int colour = Math.min((int)(fade * 255f), globalAlpha) << 24 | 0xFFFFFF;
@@ -187,10 +187,10 @@ public class RenderElement {
     }
     private static float[] indeterminateBar(int frame, boolean isActive) {
         if (RenderElement.globalAlpha != 0xFF || !isActive) {
-            return new float[] {0f,1f};
+            return new float[] { 0f, 1f };
         } else {
             var progress = frame % 100;
-            return new float[]{clamp((progress - 2) / 100f, 0f, 1f), clamp((progress + 2) / 100f, 0f, 1f)};
+            return new float[] { Math.clamp((progress - 2) / 100f, 0f, 1f), Math.clamp((progress + 2) / 100f, 0f, 1f) };
         }
     }
 
@@ -291,12 +291,9 @@ public class RenderElement {
     }
 
 
+    @Deprecated(since = "1.21.4", forRemoval = true)
     public static float clamp(float num, float min, float max) {
-        if (num < min) {
-            return min;
-        } else {
-            return Math.min(num, max);
-        }
+        return Math.clamp(num, min, max);
     }
 
     public static int clamp(int num, int min, int max) {
