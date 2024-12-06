@@ -22,8 +22,8 @@ public class RenderElement {
     static int globalAlpha = 255;
     private int retireCount;
 
+    @FunctionalInterface
     interface Renderer {
-
         void accept(SimpleBufferBuilder bb, DisplayContext context, int frame);
 
         default Renderer then(Renderer r) {
@@ -34,10 +34,14 @@ public class RenderElement {
             };
         }
     }
+
     @FunctionalInterface
     interface TextureRenderer {
         void accept(SimpleBufferBuilder bb, DisplayContext context, int[] size, int frame);
     }
+
+    /** @deprecated Use {@link Renderer} directly. This was always eagerly resolved, making it an unnecessary wrapper. */
+    @Deprecated(since = "1.21.4", forRemoval = true)
     @FunctionalInterface
     interface Initializer extends Supplier<Renderer> {}
 
@@ -56,9 +60,16 @@ public class RenderElement {
         }
     }
 
+    /** @deprecated Use {@link RenderElement#RenderElement(Renderer)} instead */
+    @Deprecated(since = "1.21.4", forRemoval = true)
     public RenderElement(final Initializer rendererInitializer) {
         this.bb = new SimpleBufferBuilder(1);
         this.renderer = rendererInitializer.get();
+    }
+
+    public RenderElement(Renderer renderer) {
+        this.bb = new SimpleBufferBuilder(1);
+        this.renderer = renderer;
     }
 
     public boolean render(DisplayContext ctx, int count) {
@@ -96,7 +107,7 @@ public class RenderElement {
     }
 
     public static RenderElement mojang(final int textureId, final int frameStart) {
-        return new RenderElement(()->(bb, ctx, frame) -> {
+        return new RenderElement((bb, ctx, frame) -> {
             var size = 256 * ctx.scale();
             var x0 = (ctx.scaledWidth() - 2 * size) / 2;
             var y0 = 64 * ctx.scale() + 32;
@@ -148,11 +159,11 @@ public class RenderElement {
         }));
     }
     public static RenderElement progressBars(SimpleFont font) {
-        return new RenderElement(() -> (bb, ctx, frame) -> RenderElement.startupProgressBars(font, bb, ctx, frame));
+        return new RenderElement((bb, ctx, frame) -> RenderElement.startupProgressBars(font, bb, ctx, frame));
     }
 
     public static RenderElement performanceBar(SimpleFont font) {
-        return new RenderElement(() -> (bb, ctx, frame) -> RenderElement.memoryInfo(font, bb, ctx, frame));
+        return new RenderElement((bb, ctx, frame) -> RenderElement.memoryInfo(font, bb, ctx, frame));
     }
 
     public static void startupProgressBars(SimpleFont font, final SimpleBufferBuilder buffer, final DisplayContext context, final int frameNumber) {
@@ -258,8 +269,8 @@ public class RenderElement {
         };
     }
 
-    private static Initializer initializeText(SimpleFont font, TextGenerator textGenerator) {
-        return () -> (bb, context, frame) -> renderText(font, textGenerator, bb, context);
+    private static Renderer initializeText(SimpleFont font, TextGenerator textGenerator) {
+        return (bb, context, frame) -> renderText(font, textGenerator, bb, context);
     }
 
     private static void renderText(final SimpleFont font, final TextGenerator textGenerator, final SimpleBufferBuilder bb, final DisplayContext context) {
@@ -273,14 +284,13 @@ public class RenderElement {
     private static TextGenerator text(int x, int y, String text, int colour) {
         return (bb, font, context) -> font.generateVerticesForTexts(x, y, bb, new SimpleFont.DisplayText(text, colour));
     }
-    private static Initializer initializeTexture(final String textureFileName, int size, int textureNumber, TextureRenderer positionAndColour) {
-        return ()->{
-            int[] imgSize = STBHelper.loadTextureFromClasspath(textureFileName, size, GL_TEXTURE0 + textureNumber + INDEX_TEXTURE_OFFSET);
-            return (bb, ctx, frame) -> {
-                ctx.elementShader().updateTextureUniform(textureNumber + INDEX_TEXTURE_OFFSET);
-                ctx.elementShader().updateRenderTypeUniform(ElementShader.RenderType.TEXTURE);
-                renderTexture(bb, ctx, frame, imgSize, positionAndColour);
-            };
+
+    private static Renderer initializeTexture(final String textureFileName, int size, int textureNumber, TextureRenderer positionAndColour) {
+        int[] imgSize = STBHelper.loadTextureFromClasspath(textureFileName, size, GL_TEXTURE0 + textureNumber + INDEX_TEXTURE_OFFSET);
+        return (bb, ctx, frame) -> {
+            ctx.elementShader().updateTextureUniform(textureNumber + INDEX_TEXTURE_OFFSET);
+            ctx.elementShader().updateRenderTypeUniform(ElementShader.RenderType.TEXTURE);
+            renderTexture(bb, ctx, frame, imgSize, positionAndColour);
         };
     }
 
