@@ -195,13 +195,22 @@ public class RenderElement {
     }
 
     private static void memoryInfo(SimpleFont font, final SimpleBufferBuilder buffer, final DisplayContext context, final int frameNumber) {
-        var y = 10 * context.scale();
+        int barY = 10 * context.scale();
+        int textY = barY;
         PerformanceInfo pi = context.performance();
-        final int colour = hsvToRGB((1.0f - (float)Math.pow(pi.memory(), 1.5f)) / 3f, 1.0f, 0.5f);
-        var bar = progressBar(ctx -> new int[]{(ctx.scaledWidth() - BAR_WIDTH * ctx.scale()) / 2, y, BAR_WIDTH * ctx.scale()}, f -> colour, f -> new float[]{0f, pi.memory()});
-        var width = font.stringWidth(pi.text());
-        Renderer label = (bb, ctx, frame) -> renderText(font, text(ctx.scaledWidth() / 2 - width / 2, y + 18, pi.text(), context.colourScheme.foreground().packedint(globalAlpha)), bb, ctx);
-        bar.then(label).accept(buffer, context, frameNumber);
+
+        int textX = context.scaledWidth() / 2 - font.stringWidth(pi.text()) / 2;
+        if (pi.showMemoryBar()) {
+            float memory = pi.memory();
+            var bar = progressBar(
+                    ctx -> new int[]{ (ctx.scaledWidth() - BAR_WIDTH * ctx.scale()) / 2, barY, BAR_WIDTH * ctx.scale() },
+                    f -> hsvToRGB((1.0f - (float) Math.pow(memory, 1.5f)) / 3f, 1.0f, 0.5f),
+                    f -> new float[] { 0f, memory }
+            );
+            bar.accept(buffer, context, frameNumber);
+            textY += 18;
+        }
+        renderText(font, text(textX, textY, pi.text(), context.colourScheme.foreground().packedint(globalAlpha)), buffer, context);
     }
 
     @FunctionalInterface

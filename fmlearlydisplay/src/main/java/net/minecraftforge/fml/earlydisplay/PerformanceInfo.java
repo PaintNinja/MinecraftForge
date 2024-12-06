@@ -14,6 +14,7 @@ import java.lang.management.MemoryUsage;
 
 public class PerformanceInfo {
 
+    private final boolean showMemoryUsageBar;
     private final boolean showCPUUsage;
     private final OperatingSystemMXBean osBean;
     private final MemoryMXBean memoryBean;
@@ -22,6 +23,7 @@ public class PerformanceInfo {
     private String text;
 
     PerformanceInfo() {
+        showMemoryUsageBar = FMLConfig.getBoolConfigValue(FMLConfig.ConfigValue.EARLY_WINDOW_SHOW_MEM_BAR);
         showCPUUsage = FMLConfig.getBoolConfigValue(FMLConfig.ConfigValue.EARLY_WINDOW_SHOW_CPU);
         osBean = showCPUUsage ? ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class) : null;
         memoryBean = ManagementFactory.getMemoryMXBean();
@@ -53,5 +55,9 @@ public class PerformanceInfo {
 
     float memory() {
         return memory;
+    }
+
+    boolean showMemoryBar() {
+        return showMemoryUsageBar;
     }
 }
