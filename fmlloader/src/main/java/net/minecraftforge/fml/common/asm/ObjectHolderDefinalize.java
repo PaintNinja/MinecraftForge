@@ -66,6 +66,7 @@ public class ObjectHolderDefinalize implements ILaunchPluginService {
         if (internalName.startsWith("com/mojang"))
             return NAY;
 
+        // ...except specific ones we added to the VANILLA_OBJECT_HOLDERS map
         if (internalName.startsWith("net/minecraft/") && !VANILLA_OBJECT_HOLDER_CLASSES.contains(internalName))
             return NAY;
 
