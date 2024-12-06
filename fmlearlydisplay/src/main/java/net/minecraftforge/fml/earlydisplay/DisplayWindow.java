@@ -149,7 +149,7 @@ public class DisplayWindow implements ImmediateWindowProvider {
         }
         this.maximized = parsed.has(maximizedopt) || FMLConfig.getBoolConfigValue(FMLConfig.ConfigValue.EARLY_WINDOW_MAXIMIZED);
 
-        StartupNotificationManager.modLoaderConsumer().ifPresent(c->c.accept("Forge loading " + forgeVersion));
+        StartupNotificationManager.modLoaderConsumer().ifPresent(c->c.accept("Forge loading " + FMLLoader.versionInfo().forgeVersion()));
         performanceInfo = new PerformanceInfo();
         return start(mcVersion, forgeVersion);
     }
@@ -238,7 +238,7 @@ public class DisplayWindow implements ImmediateWindowProvider {
 
         var date = Calendar.getInstance();
         if (FMLConfig.getBoolConfigValue(FMLConfig.ConfigValue.EARLY_WINDOW_SQUIR) || (date.get(Calendar.MONTH) == Calendar.APRIL && date.get(Calendar.DAY_OF_MONTH) == 1))
-            this.elements.add(0, RenderElement.squir());
+            this.elements.addFirst(RenderElement.squir());
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -304,7 +304,7 @@ public class DisplayWindow implements ImmediateWindowProvider {
         return this.glVersion;
     }
 
-    private void crashElegantly(String errorDetails) {
+    private static void crashElegantly(String errorDetails) {
         StringBuilder msgBuilder = new StringBuilder(2000);
         msgBuilder.append("Failed to initialize graphics window with current settings.\n");
         msgBuilder.append("\n\n");
@@ -512,7 +512,7 @@ public class DisplayWindow implements ImmediateWindowProvider {
             this.winY = y;
         }
     }
-    private void handleLastGLFWError(BiConsumer<Integer, String> handler) {
+    private static void handleLastGLFWError(BiConsumer<Integer, String> handler) {
         try (MemoryStack memorystack = MemoryStack.stackPush()) {
             PointerBuffer pointerbuffer = memorystack.mallocPointer(1);
             int error = glfwGetError(pointerbuffer);
@@ -640,7 +640,7 @@ public class DisplayWindow implements ImmediateWindowProvider {
     }
 
     public void addMojangTexture(final int textureId) {
-        this.elements.add(0, RenderElement.mojang(textureId, framecount));
+        this.elements.addFirst(RenderElement.mojang(textureId, framecount));
     }
 
     public void close() {
