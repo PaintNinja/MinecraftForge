@@ -16,7 +16,9 @@ import java.lang.annotation.Target;
 /**
  * ObjectHolder can be used to automatically populate public static final fields with entries
  * from the registry. These values can then be referred within mod code directly.
+ * @deprecated Use {@link DeferredRegister} instead.
  */
+@Deprecated(since = "1.21.4", forRemoval = true)
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface ObjectHolder
