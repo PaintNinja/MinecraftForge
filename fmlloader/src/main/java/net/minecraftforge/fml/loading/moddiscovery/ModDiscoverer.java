@@ -22,6 +22,7 @@ import net.minecraftforge.forgespi.language.IModFileInfo;
 import net.minecraftforge.forgespi.locating.IDependencyLocator;
 import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -92,7 +93,12 @@ public class ModDiscoverer {
 
                 if (distIsDedicatedServer) {
                     var clientOnlyModFiles = locatedFiles.stream()
-                            .filter(file -> (Boolean) file.getModFileInfo().getFileProperties().getOrDefault(ModFileInfo.CLIENT_SIDE_ONLY_PROP, Boolean.FALSE))
+                            .filter(file -> {
+                                // some mod files can have null infos, like javafml, mclanguage, lowcode, and fmlcore
+                                @Nullable var info = file.getModFileInfo();
+
+                                return info != null && (Boolean) info.getFileProperties().getOrDefault(ModFileInfo.CLIENT_SIDE_ONLY_PROP, Boolean.FALSE);
+                            })
                             .toList();
                     if (!clientOnlyModFiles.isEmpty()) {
                         LOGGER.warn(LogMarkers.SCAN, "Locator {} returned {} files which are client-side-only mods, but we're on a dedicated server. They will be skipped!", locator, clientOnlyModFiles.size());
