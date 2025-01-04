@@ -9,8 +9,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
@@ -37,7 +35,6 @@ import java.util.function.Consumer;
  * @see MouseInput
  * @see KeyInput
  */
-@OnlyIn(Dist.CLIENT)
 public abstract class ScreenEvent extends Event {
     private final Screen screen;
 

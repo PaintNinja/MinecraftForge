@@ -1,77 +1,114 @@
-var ASMAPI = Java.type('net.minecraftforge.coremod.api.ASMAPI');
-var Opcodes = Java.type('org.objectweb.asm.Opcodes');
-var Handle = Java.type('org.objectweb.asm.Handle');
-var MethodInsnNode = Java.type('org.objectweb.asm.tree.MethodInsnNode');
+/*
+ * Copyright (c) Forge Development LLC and contributors
+ * SPDX-License-Identifier: LGPL-2.1-only
+ */
 
-function finalizeSpawnNode(node){
-    return new MethodInsnNode(
-        Opcodes.INVOKESTATIC,
-        "net/minecraftforge/event/ForgeEventFactory",
-        "onFinalizeSpawn",
-        "(Lnet/minecraft/world/entity/Mob;Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/world/DifficultyInstance;Lnet/minecraft/world/entity/EntitySpawnReason;Lnet/minecraft/world/entity/SpawnGroupData;)Lnet/minecraft/world/entity/SpawnGroupData;",
-        false);
-}
+'use strict';
 
-function contains(list, target) {
-    for(var i = 0; i < list.length; i++) {
-        if(list[i] == target) return true;
-    }
-    return false;
-}
+const ASMAPI = Java.type('net.minecraftforge.coremod.api.ASMAPI');
+const Opcodes = Java.type('org.objectweb.asm.Opcodes');
 
-function search(className, node, replacements) {
-    for(var i = 0; i < replacements.length; i++){
-        var r = replacements[i];
-        if(contains(r.targets, className) && node.getOpcode() == r.opcode && node.name == r.name && node.desc == r.desc) {
-            return r;
+// we can't run ASMAPI.loadData in the global context, so we do it here
+// this function is called inside of initializeCoreMod
+const replacements = [];
+function initReplacements() {
+    ASMAPI.log('DEBUG', 'Gathering Forge method redirector replacements');
+    replacements.push({
+        // finalizeSpawn redirection to ForgeEventFactory.onFinalizeSpawn
+        'type': ASMAPI.MethodType.VIRTUAL,
+        'name': 'finalizeSpawn',
+        'desc': '(Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/world/DifficultyInstance;Lnet/minecraft/world/entity/EntitySpawnReason;Lnet/minecraft/world/entity/SpawnGroupData;)Lnet/minecraft/world/entity/SpawnGroupData;',
+        'targets': ASMAPI.loadData('coremods/finalize_spawn_targets.json'),
+        'factory': function(insn) {
+            return ASMAPI.buildMethodCall(
+                ASMAPI.MethodType.STATIC,
+                'net/minecraftforge/event/ForgeEventFactory',
+                'onFinalizeSpawn',
+                '(Lnet/minecraft/world/entity/Mob;Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/world/DifficultyInstance;Lnet/minecraft/world/entity/EntitySpawnReason;Lnet/minecraft/world/entity/SpawnGroupData;)Lnet/minecraft/world/entity/SpawnGroupData;');
         }
-    }
-    return null;
+    });
 }
-
-var replacements = [
-    {
-        'opcode': Opcodes.INVOKEVIRTUAL,
-        'name': ASMAPI.mapMethod('m_6518_'),
-        'desc': '(Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/world/DifficultyInstance;Lnet/minecraft/world/entity/MobSpawnType;Lnet/minecraft/world/entity/SpawnGroupData;)Lnet/minecraft/world/entity/SpawnGroupData;',
-        'targets': 'coremods/finalize_spawn_targets.json',
-        'factory': finalizeSpawnNode
-    }
-];
 
 function initializeCoreMod() {
-    var mergedTargets = [];
-    for(var i = 0; i < replacements.length; i++){
-        var r = replacements[i];
-        r.targets = ASMAPI.loadData(r.targets);
-        for(var k = 0; k < r.targets.length; k++){
-            mergedTargets.push(r.targets[k]);
-        }
-    }
+    initReplacements();
 
     return {
         'forge_method_redirector': {
             'target': {
                 'type': 'CLASS',
-                'names': function(listofclasses) {
-                    return mergedTargets
-                }
+                'names': getTargets
             },
-            'transformer': function(classNode) {
-                var methods = classNode.methods;
-                var count = 0;
-                for(var i = 0; i < methods.size(); i++){
-                    var instr = methods.get(i).instructions;
-                    for(var ix = 0; ix < instr.size(); ix++){
-                        var node = instr.get(ix);
-                        var temp = search(classNode.name, node, replacements);
-                        if (temp != null) {
-                            instr.set(node, temp.factory(node));
-                        }
-                    }
-                }
-                return classNode;
+            'transformer': applyMethodRedirects
+        }
+    }
+}
+
+function getTargets(classes) {
+    const mergedTargets = [];
+    for (let replacement of replacements) {
+        for (let target of replacement.targets) {
+            mergedTargets.push(target.class);
+        }
+    }
+
+    return mergedTargets;
+}
+
+function applyMethodRedirects(clazz) {
+    for (let replacement of replacements) {
+        for (let methodString of getClassTargetMethods(clazz, replacement)) {
+            // cut up the string since we've put both the name and desc as the target
+            const splitPos = methodString.indexOf('(');
+            const methodName = methodString.substring(0, splitPos);
+            const methodDesc = methodString.substring(splitPos);
+            const method = ASMAPI.findMethodNode(clazz, methodName, methodDesc);
+
+            // if we can't find the method, get out now!
+            if (method === null) {
+                ASMAPI.log('ERROR', 'Failed to redirect method call for {}! Method {} not found in class {}! This is a Forge bug, and is likely due to a Minecraft update changing something.', replacement.name, methodString, clazz.name);
+                continue;
             }
+
+            for (let insn of method.instructions) {
+                if (shouldReplace(insn, replacement)) {
+                    const redirection = replacement.factory(insn);
+                    ASMAPI.log('DEBUG', 'Redirecting method call {}{} to {}{} inside of {}.{}', insn.name, insn.desc, redirection.name, redirection.desc, clazz.name, method.name);
+                    ASMAPI.insertInsn(method, insn, redirection, ASMAPI.InsertMode.REMOVE_ORIGINAL);
+                }
+            }
+        }
+    }
+
+    return clazz;
+}
+
+
+/* HELPER FUNCTIONS FOR TARGET SEARCHING */
+
+function shouldReplace(insn, replacement) {
+    return insn.getOpcode() === replacement.type.toOpcode()
+        && insn.name === replacement.name
+        && insn.desc === replacement.desc;
+}
+
+function getClassTargetMethods(clazz, replacement) {
+    for (let t of replacement.targets) {
+        if (t.class === clazz.name) {
+            const targets = [];
+
+            // declared methods
+            for (let method of t.methods) {
+                targets.push(method);
+            }
+
+            // synthetic methods
+            for (let method of clazz.methods) {
+                if ((method.access & Opcodes.ACC_SYNTHETIC) != 0) {
+                    targets.push(method.name + method.desc);
+                }
+            }
+
+            return targets;
         }
     }
 }

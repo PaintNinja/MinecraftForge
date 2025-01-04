@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Forge Development LLC and contributors
+ * SPDX-License-Identifier: LGPL-2.1-only
+ */
+
 var ASMAPI = Java.type('net.minecraftforge.coremod.api.ASMAPI')
 
 function initializeCoreMod() {

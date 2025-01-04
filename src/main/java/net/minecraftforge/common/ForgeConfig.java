@@ -98,6 +98,8 @@ public class ForgeConfig {
 
         public final BooleanValue showLoadWarnings;
 
+        public final BooleanValue allowMipmapLowering;
+
         Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Client only settings, mostly things related to rendering")
                    .push("client");
@@ -112,6 +114,11 @@ public class ForgeConfig {
                 .translation("forge.configgui.showLoadWarnings")
                 .define("showLoadWarnings", true);
 
+            allowMipmapLowering = builder
+                .comment("When enabled, Forge will allow mipmaps to be lowered in real-time. This is the default behavior in vanilla. Use this if you experience issues with resource packs that use textures lower than 8x8.")
+                .translation("forge.configgui.allowMipmapLowering")
+                .define("allowMipmapLowering", false);
+
             builder.pop();
         }
 
@@ -119,6 +126,10 @@ public class ForgeConfig {
         // Prevents a ton of spam when an error screen is displayed.
         public final boolean showLoadWarnings() {
             return clientSpec.isLoaded() ? showLoadWarnings.get() : showLoadWarnings.getDefault();
+        }
+
+        public final boolean allowMipmapLowering() {
+            return clientSpec.isLoaded() ? allowMipmapLowering.get() : allowMipmapLowering.getDefault();
         }
     }
 
