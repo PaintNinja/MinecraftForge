@@ -85,6 +85,16 @@ public final class ForgeBlockTagsProvider extends BlockTagsProvider {
         tag(FENCES).addTags(FENCES_NETHER_BRICK, FENCES_WOODEN); // forge:fences
         tag(FENCES_NETHER_BRICK).add(Blocks.NETHER_BRICK_FENCE); // forge:fences/nether_brick
         tag(FENCES_WOODEN).addTag(BlockTags.WOODEN_FENCES); // forge:fences/wooden
+        tag(Tags.Blocks.FLOWERS_SMALL)
+                .add(Blocks.DANDELION, Blocks.POPPY, Blocks.BLUE_ORCHID, Blocks.ALLIUM, Blocks.AZURE_BLUET, Blocks.RED_TULIP, Blocks.ORANGE_TULIP, Blocks.WHITE_TULIP, Blocks.PINK_TULIP, Blocks.OXEYE_DAISY, Blocks.CORNFLOWER, Blocks.LILY_OF_THE_VALLEY, Blocks.WITHER_ROSE, Blocks.TORCHFLOWER, Blocks.OPEN_EYEBLOSSOM, Blocks.CLOSED_EYEBLOSSOM)
+                .addOptionalTag(BlockTags.SMALL_FLOWERS);
+        tag(Tags.Blocks.FLOWERS_TALL)
+                .add(Blocks.SUNFLOWER, Blocks.LILAC, Blocks.PEONY, Blocks.ROSE_BUSH, Blocks.PITCHER_PLANT)
+                .addOptional(ResourceLocation.withDefaultNamespace("tall_flowers"));
+        tag(Tags.Blocks.FLOWERS)
+                .add(Blocks.FLOWERING_AZALEA_LEAVES, Blocks.FLOWERING_AZALEA, Blocks.MANGROVE_PROPAGULE, Blocks.PINK_PETALS, Blocks.CHORUS_FLOWER, Blocks.SPORE_BLOSSOM)
+                .addTags(Tags.Blocks.FLOWERS_SMALL, Tags.Blocks.FLOWERS_TALL)
+                .addOptionalTag(BlockTags.FLOWERS);
         tag(GLASS_BLOCKS)
                 .addTags(GLASS_BLOCKS_COLORLESS, GLASS_BLOCKS_CHEAP, GLASS_BLOCKS_TINTED)
                 .addOptionalTag(forgeTagKey("glass"));

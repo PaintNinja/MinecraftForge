@@ -164,6 +164,22 @@ public class Tags {
         public static final TagKey<Block> DYED_WHITE = cTag("dyed/white");
         public static final TagKey<Block> DYED_YELLOW = cTag("dyed/yellow");
 
+        /**
+         * Contains living ground-based flowers that are 1 block tall such as Dandelions or Poppy.
+         * Equivalent to the {@code minecraft:small_flowers} block tag.
+         */
+        public static final TagKey<Block> FLOWERS_SMALL = cTag("flowers/small");
+        /**
+         * Contains living ground-based flowers that are 2 block tall such as Rose Bush or Peony.
+         * Equivalent to the {@code minecraft:tall_flowers} block tag in past Minecraft versions.
+         */
+        public static final TagKey<Block> FLOWERS_TALL = cTag("flowers/tall");
+        /**
+         * Contains any living plant block that contains flowers or is a flower itself.
+         * Equivalent to the {@code minecraft:flowers} block tag.
+         */
+        public static final TagKey<Block> FLOWERS = cTag("flowers");
+
         public static final TagKey<Block> GLASS_BLOCKS = cTag("glass_blocks");
         public static final TagKey<Block> GLASS_BLOCKS_COLORLESS = cTag("glass_blocks/colorless");
         /**
@@ -615,6 +631,21 @@ public class Tags {
          * For bonemeal-like items that can grow plants.
          */
         public static final TagKey<Item> FERTILIZERS = cTag("fertilizers");
+        /**
+         * Contains living ground-based flowers that are 1 block tall such as Dandelions or Poppy.
+         * Equivalent to the {@code minecraft:small_flowers} item tag.
+         */
+        public static final TagKey<Item> FLOWERS_SMALL = cTag("flowers/small");
+        /**
+         * Contains living ground-based flowers that are 2 block tall such as Rose Bush or Peony.
+         * Equivalent to the {@code minecraft:tall_flowers} item tag in past Minecraft versions.
+         */
+        public static final TagKey<Item> FLOWERS_TALL = cTag("flowers/tall");
+        /**
+         * Contains any living plant block that contains flowers or is a flower itself.
+         * Equivalent to the {@code minecraft:flowers} item tag in past Minecraft versions.
+         */
+        public static final TagKey<Item> FLOWERS = cTag("flowers");
         public static final TagKey<Item> FOODS = cTag("foods");
         /**
          * Apples and other foods that are considered fruits in the culinary field belong in this tag.
