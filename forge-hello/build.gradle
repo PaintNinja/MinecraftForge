@@ -1,0 +1,13 @@
+plugins {
+    id 'net.minecraftforge.forge.build.convention'
+}
+
+gradleutils.displayName = 'Forge-Hello'
+description = 'Minimal hello world mod for testing workspace modules'
+
+// ModuleLoader reads Mixin configs from this manifest attribute
+convention.manifest('net/minecraftforge/hello/', [
+    'MixinConfigs': 'forge_hello.mixins.json'
+])
+
+convention.basicRuns()

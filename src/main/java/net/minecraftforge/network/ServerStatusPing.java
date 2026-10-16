@@ -12,7 +12,6 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.util.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
-import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
 
 import java.util.HashMap;
@@ -79,6 +78,9 @@ public record ServerStatusPing(
         int fmlNetworkVer,
         boolean truncated
 ) {
+    /** Marks a mod that clients don't need, the value of FML's {@code DisplayTest.IGNORESERVERONLY}. It's part of the list ping format. */
+    public static final String IGNORE_SERVER_ONLY = "SERVER_ONLY";
+
     private static final Codec<ByteBuf> BYTE_BUF_CODEC = Codec.STRING
             .xmap(ServerStatusPing::decodeOptimized, ServerStatusPing::encodeOptimized);
 
@@ -103,11 +105,11 @@ public record ServerStatusPing(
     public ServerStatusPing() {
         this(
             NetworkRegistry.buildChannelVersionsForListPing(),
-            Util.make(new HashMap<>(), map -> ModList.forEachModContainer((modid, mc) ->
-                map.put(modid, mc.getCustomExtension(IExtensionPoint.DisplayTest.class)
-                    .map(IExtensionPoint.DisplayTest::suppliedVersion)
-                    .map(Supplier::get)
-                    .orElse(IExtensionPoint.DisplayTest.IGNORESERVERONLY)))),
+            Util.make(new HashMap<>(), map -> {
+                // TODO [ModuleLoader] Report each mod's compatibility version again once DisplayTest is replaced
+                for (var modId : ModList.getModIds())
+                    map.put(modId, IGNORE_SERVER_ONLY);
+            }),
             NetworkContext.NET_VERSION,
             false
         );
@@ -158,7 +160,7 @@ public record ServerStatusPing(
         buf.writeShort(mods.size()); // short so that we can replace it later in case of truncation
         int writtenCount = 0;
         for (var modEntry : mods.entrySet()) {
-            var isIgnoreServerOnly = modEntry.getValue().equals(IExtensionPoint.DisplayTest.IGNORESERVERONLY);
+            var isIgnoreServerOnly = modEntry.getValue().equals(IGNORE_SERVER_ONLY);
 
             var channelsForMod = getChannelsForMod(modEntry.getKey());
             var channelSizeAndVersionFlag = channelsForMod.size() << 1;
@@ -222,7 +224,7 @@ public record ServerStatusPing(
                 var channelSize = channelSizeAndVersionFlag >>> 1;
                 var isIgnoreServerOnly = (channelSizeAndVersionFlag & VERSION_FLAG_IGNORESERVERONLY) != 0;
                 var modId = buf.readUtf();
-                var modVersion = isIgnoreServerOnly ? IExtensionPoint.DisplayTest.IGNORESERVERONLY : buf.readUtf();
+                var modVersion = isIgnoreServerOnly ? IGNORE_SERVER_ONLY : buf.readUtf();
                 for (var i1 = 0; i1 < channelSize; i1++) {
                     var channelName = buf.readUtf();
                     var channelVersion = buf.readVarInt();

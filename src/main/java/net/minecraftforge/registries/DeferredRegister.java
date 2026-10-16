@@ -7,13 +7,12 @@ package net.minecraftforge.registries;
 
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
+import ga.ozli.novamodloader.api.ModuleLoaderMod;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
-import net.minecraftforge.eventbus.api.bus.BusGroup;
-import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.registries.tags.ITagManager;
 
 import org.jetbrains.annotations.NotNull;
@@ -42,8 +41,8 @@ import java.util.function.Supplier;
  *   public static final RegistryObject<Item> ROCK_ITEM = ITEMS.register("rock", () -> new BlockItem(ROCK_BLOCK.get(), new Item.Properties().group(ItemGroup.MISC)));
  *
  *   public ExampleMod() {
- *       ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
- *       BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
+ *       ITEMS.register(this);
+ *       BLOCKS.register(this);
  *   }
  *}</pre>
  *
@@ -313,15 +312,14 @@ public class DeferredRegister<T> {
     }
 
     /**
-     * Adds our event handler to the specified event bus, this MUST be called in order for this class to function.
+     * Adds our event handlers, this MUST be called in order for this class to function.
      * See {@link DeferredRegister the example usage}.
      *
-     * @param modBusGroup The mod-specific event bus group, obtained from {@link FMLModContainer#getModBusGroup()} or
-     *                    your language provider's equivalent.
+     * @param owner The entrypoint of the mod the entries belong to, needed to tell apart mods overriding the same entry
      */
-    public void register(BusGroup modBusGroup) {
-        var dispatcher = new EventDispatcher();
-        RegisterEvent.getBus(modBusGroup).addListener(dispatcher::handleEvent);
+    public void register(ModuleLoaderMod owner) {
+        var dispatcher = new EventDispatcher(owner);
+        RegisterEvent.BUS.addListener(dispatcher::handleEvent);
         NewRegistryEvent.BUS.addListener(dispatcher::createRegistry);
     }
 
@@ -376,11 +374,17 @@ public class DeferredRegister<T> {
     }
 
     private final class EventDispatcher {
+        private final ModuleLoaderMod owner;
+
+        private EventDispatcher(ModuleLoaderMod owner) {
+            this.owner = owner;
+        }
+
         public void handleEvent(RegisterEvent event) {
             if (event.getRegistryKey().equals(registryKey)) {
                 seenRegisterEvent = true;
                 for (var e : entries.entrySet()) {
-                    event.register(registryKey, e.getKey().getId(), () -> e.getValue().get());
+                    event.register(owner, registryKey, e.getKey().getId(), () -> e.getValue().get());
                     e.getKey().updateReference(event);
                 }
 

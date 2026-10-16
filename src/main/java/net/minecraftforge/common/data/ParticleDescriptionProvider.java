@@ -17,7 +17,6 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -35,7 +34,7 @@ import java.util.stream.Stream;
  *
  * <p>To use this provider, extend this class and implement {@link #addDescriptions()}.
  * Then, register an instance using {@link net.minecraft.data.DataGenerator#addProvider(boolean, Factory)}
- * via the {@link net.minecraftforge.data.event.GatherDataEvent} on the {@linkplain FMLJavaModLoadingContext#getModEventBus() mod event bus}.
+ * via the {@link net.minecraftforge.data.event.GatherDataEvent} on its {@linkplain net.minecraftforge.data.event.GatherDataEvent#BUS event bus}.
  *
  * <p>A description can be added to a {@link ParticleType} which uses a {@linkplain #sprite(ParticleType, Identifier) sprite}
  * or {@linkplain #spriteSet(ParticleType, Iterable) sprite set}.

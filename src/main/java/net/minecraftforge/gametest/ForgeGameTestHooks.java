@@ -5,6 +5,7 @@
 
 package net.minecraftforge.gametest;
 
+import ga.ozli.novamodloader.api.ModuleLoaderMod;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestEnvironments;
@@ -12,7 +13,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.TestData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.common.util.ModNamespace;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -68,11 +69,10 @@ public class ForgeGameTestHooks {
         if (prefix != null)
             return prefix.value() + '/';
 
-        var mod = cls.getAnnotation(Mod.class);
-        if (mod != null) {
+        if (ModuleLoaderMod.class.isAssignableFrom(cls)) {
             var holder = cls.getAnnotation(GameTestNamespace.class);
             if (holder != null && !holder.value().isEmpty())
-                return mod.value() + '/';
+                return ModNamespace.of(cls.getModule()) + '/';
         }
 
 
@@ -84,11 +84,7 @@ public class ForgeGameTestHooks {
         if (holder != null && !holder.value().isEmpty())
             return holder.value();
 
-        var mod = cls.getAnnotation(Mod.class);
-        if (mod != null)
-            return mod.value();
-
-        throw new IllegalArgumentException("Could not find modid for " + cls.getName());
+        return ModNamespace.of(cls.getModule());
     }
 
     private static Identifier key(String namespace, String prefix, String path) {

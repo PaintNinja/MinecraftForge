@@ -28,11 +28,6 @@ public interface IForgeRegistry<V> extends Iterable<V> {
     ResourceKey<Registry<V>> getRegistryKey();
     Identifier getRegistryName();
 
-    /**
-     * The supplied string key will be prefixed with the currently active mod's mod id.
-     * If the supplied name already has a prefix that is different, it will be used and a warning will be logged.
-     */
-    void register(String key, V value);
     void register(Identifier key, V value);
 
     boolean containsKey(Identifier key);

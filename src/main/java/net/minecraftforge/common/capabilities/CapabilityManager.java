@@ -7,14 +7,12 @@ package net.minecraftforge.common.capabilities;
 
 import net.minecraft.resources.Identifier;
 import net.minecraftforge.fml.Logging;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.objectweb.asm.Type;
 
-import java.util.Comparator;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,13 +83,9 @@ public final class CapabilityManager {
 
     @ApiStatus.Internal
     public static void injectCapabilities() {
-        var autos = ModList.getAllScanData().stream()
-            .flatMap(e -> e.getAnnotations().stream())
-            .filter(a -> AUTO_REGISTER.equals(a.annotationType()))
-            .map(ModFileScanData.AnnotationData::clazz)
-            .distinct()
-            .sorted(Comparator.comparing(Type::toString))
-            .toList();
+        // TODO [ModuleLoader] Find @AutoRegisterCapability classes without runtime classpath scanning, such as from
+        //  a file of annotated classes generated at build time, or by replacing the annotation with ServiceLoader
+        List<Type> autos = List.of();
 
         for (var auto : autos) {
             LOGGER.debug(Logging.CAPABILITIES, "Attempting to automatically register: " + auto);

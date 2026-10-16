@@ -14,7 +14,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.language.IModInfo;
 
 /**
  * Prefixes S2CModList by sending additional data about the mods installed on the server to the client
@@ -30,9 +29,10 @@ public record ModVersions(Map<String, Info> mods) {
     );
 
     public static ModVersions create() {
-        return new ModVersions(ModList.getMods().stream().collect(Collectors.toMap(
-            IModInfo::getModId,
-            mod -> new Info(mod.getDisplayName(), mod.getVersion().toString())
+        // TODO [ModuleLoader] Send display names again once mods can declare one, the id stands in for now
+        return new ModVersions(ModList.getModIds().stream().collect(Collectors.toMap(
+            modId -> modId,
+            modId -> new Info(modId, ModList.getVersion(modId).orElse(""))
         )));
     }
 

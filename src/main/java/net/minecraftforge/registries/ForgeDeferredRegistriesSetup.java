@@ -5,7 +5,7 @@
 
 package net.minecraftforge.registries;
 
-import net.minecraftforge.eventbus.api.bus.BusGroup;
+import ga.ozli.novamodloader.api.ModuleLoaderMod;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -15,7 +15,7 @@ public class ForgeDeferredRegistriesSetup {
     /**
      * Internal forge method. Modders do not call.
      */
-    public static void setup(BusGroup modBusGroup) {
+    public static void setup(ModuleLoaderMod forge) {
         synchronized (ForgeDeferredRegistriesSetup.class) {
             if (setup)
                 throw new IllegalStateException("Setup has already been called!");
@@ -24,6 +24,6 @@ public class ForgeDeferredRegistriesSetup {
         }
 
         for (var reg : ForgeRegistries.registries)
-            reg.register(modBusGroup);
+            reg.register(forge);
     }
 }

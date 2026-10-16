@@ -5,14 +5,14 @@
 
 package net.minecraftforge.registries;
 
+import ga.ozli.novamodloader.api.ModuleLoaderMod;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraftforge.eventbus.api.bus.BusGroup;
+import net.minecraftforge.common.util.ModNamespace;
 import net.minecraftforge.eventbus.api.bus.EventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.event.IModBusEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.eventbus.api.event.InheritableEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,15 +22,13 @@ import java.util.function.Supplier;
 /**
  * This event fires for each forge and vanilla registry when all registries are ready to have modded objects registered.
  * <p>
- * Fired on the {@linkplain FMLJavaModLoadingContext#getModBusGroup() mod BusGroup}.
+ * Fired on the {@linkplain BusGroup#DEFAULT default BusGroup}.
  *
  * @see #register(ResourceKey, Identifier, Supplier)
  * @see #register(ResourceKey, Consumer)
  */
-public class RegisterEvent implements IModBusEvent {
-    public static EventBus<RegisterEvent> getBus(BusGroup modBusGroup) {
-        return IModBusEvent.getBus(modBusGroup, RegisterEvent.class);
-    }
+public class RegisterEvent implements InheritableEvent {
+    public static final EventBus<RegisterEvent> BUS = EventBus.create(RegisterEvent.class);
 
     @NotNull
     private final ResourceKey<? extends Registry<?>> registryKey;
@@ -54,11 +52,25 @@ public class RegisterEvent implements IModBusEvent {
      * @param <T> the type of the registry
      * @see #register(ResourceKey, Consumer) a register variant making registration of multiple objects less redundant
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public <T> void register(ResourceKey<? extends Registry<T>> registryKey, Identifier name, Supplier<T> valueSupplier) {
+        register((String) null, registryKey, name, valueSupplier);
+    }
+
+    /**
+     * Registers the value on behalf of the given mod. The mod needs to be known to override existing entries.
+     *
+     * @param owner the entrypoint of the mod registering the value
+     * @see #register(ResourceKey, Identifier, Supplier)
+     */
+    public <T> void register(ModuleLoaderMod owner, ResourceKey<? extends Registry<T>> registryKey, Identifier name, Supplier<T> valueSupplier) {
+        register(ModNamespace.of(owner), registryKey, name, valueSupplier);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private <T> void register(@Nullable String owner, ResourceKey<? extends Registry<T>> registryKey, Identifier name, Supplier<T> valueSupplier) {
         if (this.registryKey.equals(registryKey)) {
             if (this.forgeRegistry != null)
-                ((IForgeRegistry) this.forgeRegistry).register(name, valueSupplier.get());
+                ((ForgeRegistry) this.forgeRegistry).register(owner, name, valueSupplier.get());
             else if (this.vanillaRegistry != null)
                 Registry.register((Registry) this.vanillaRegistry, name, valueSupplier.get());
         }
@@ -74,6 +86,20 @@ public class RegisterEvent implements IModBusEvent {
     public <T> void register(ResourceKey<? extends Registry<T>> registryKey, Consumer<RegisterHelper<T>> consumer) {
         if (this.registryKey.equals(registryKey))
             consumer.accept((name, value) -> register(registryKey, name, () -> value));
+    }
+
+    /**
+     * Calls the provided consumer with a register helper that registers on behalf of the given mod.
+     * The mod needs to be known to override existing entries.
+     *
+     * @param owner the entrypoint of the mod registering the objects
+     * @see #register(ResourceKey, Consumer)
+     */
+    public <T> void register(ModuleLoaderMod owner, ResourceKey<? extends Registry<T>> registryKey, Consumer<RegisterHelper<T>> consumer) {
+        if (this.registryKey.equals(registryKey)) {
+            var namespace = ModNamespace.of(owner);
+            consumer.accept((name, value) -> register(namespace, registryKey, name, () -> value));
+        }
     }
 
     /**
@@ -109,19 +135,6 @@ public class RegisterEvent implements IModBusEvent {
 
     @FunctionalInterface
     public interface RegisterHelper<T> {
-        /**
-         * Registers the given value with the given name to the registry.
-         * The namespace is inferred based on the active mod container.
-         * If you wish to specify a namespace, use {@link #register(Identifier, Object)} instead.
-         *
-         * @param name the name of the object to register as its key with the namespaced inferred from the active mod container
-         * @param value the object value
-         */
-        @SuppressWarnings("removal")
-        default void register(String name, T value) {
-            register(Identifier.fromNamespaceAndPath(ModLoadingContext.get().getActiveNamespace(), name), value);
-        }
-
         /**
          * Registers the given value with the given name to the registry.
          *

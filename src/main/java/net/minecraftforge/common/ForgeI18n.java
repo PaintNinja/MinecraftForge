@@ -8,8 +8,6 @@ package net.minecraftforge.common;
 import com.google.common.base.CharMatcher;
 import net.minecraftforge.common.util.MavenVersionStringHelper;
 import net.minecraftforge.fml.Logging;
-import net.minecraftforge.fml.loading.StringUtils;
-import net.minecraftforge.forgespi.language.IModInfo;
 import org.apache.commons.lang3.text.ExtendedMessageFormat;
 import org.apache.commons.lang3.text.FormatFactory;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
+import java.util.Locale;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -42,15 +41,13 @@ public class ForgeI18n {
         // {0,modinfo,id} -> modid from ModInfo object; {0,modinfo,name} -> displayname from ModInfo object
         customFactories.put("modinfo", (_, formatString, _) -> new CustomReadOnlyFormat((stringBuffer, objectToParse) -> parseModInfo(formatString, stringBuffer, objectToParse)));
         // {0,lower} -> lowercase supplied string
-        customFactories.put("lower", (_, _, _) -> new CustomReadOnlyFormat((stringBuffer, objectToParse) -> stringBuffer.append(StringUtils.toLowerCase(String.valueOf(objectToParse)))));
+        customFactories.put("lower", (_, _, _) -> new CustomReadOnlyFormat((stringBuffer, objectToParse) -> stringBuffer.append(String.valueOf(objectToParse).toLowerCase(Locale.ROOT))));
         // {0,upper> -> uppercase supplied string
-        customFactories.put("upper", (_, _, _) -> new CustomReadOnlyFormat((stringBuffer, objectToParse) -> stringBuffer.append(StringUtils.toUpperCase(String.valueOf(objectToParse)))));
+        customFactories.put("upper", (_, _, _) -> new CustomReadOnlyFormat((stringBuffer, objectToParse) -> stringBuffer.append(String.valueOf(objectToParse).toUpperCase(Locale.ROOT))));
         // {0,exc,cls} -> class of exception; {0,exc,msg} -> message from exception
         customFactories.put("exc", (_, formatString, _) -> new CustomReadOnlyFormat((stringBuffer, objectToParse) -> parseException(formatString, stringBuffer, objectToParse)));
         // {0,vr} -> transform VersionRange into cleartext string using fml.messages.version.restriction.* strings
         customFactories.put("vr", (_, _, _) -> new CustomReadOnlyFormat(MavenVersionStringHelper::parseVersionRange));
-        // {0,featurebound} -> transform feature bound to cleartext string
-        customFactories.put("featurebound", (_, _, _) -> new CustomReadOnlyFormat(MavenVersionStringHelper::parseFeatureBoundValue));
         // {0,i18n,fml.message} -> pass object to i18n string 'fml.message'
         customFactories.put("i18n", (_, formatString, _) -> new CustomReadOnlyFormat((stringBuffer, o) -> stringBuffer.append(ForgeI18n.parseMessage(formatString, o))));
         // {0,ornull,fml.absent} -> append String value of o, or i18n string 'fml.absent' (message format transforms nulls into the string literal "null")
@@ -67,11 +64,11 @@ public class ForgeI18n {
     }
 
     private static void parseModInfo(final String formatString, final StringBuffer stringBuffer, final Object modInfo) {
-        final IModInfo info = (IModInfo) modInfo;
-        if (Objects.equals(formatString, "id")) {
-            stringBuffer.append(info.getModId());
-        } else if (Objects.equals(formatString, "name")) {
-            stringBuffer.append(info.getDisplayName());
+        // Takes a mod id or a Module. There are no display names yet, so both formats give the mod id.
+        // TODO [ModuleLoader] Use the display name for "name" once mods can declare one
+        final String modId = modInfo instanceof Module module ? module.getName() : String.valueOf(modInfo);
+        if (Objects.equals(formatString, "id") || Objects.equals(formatString, "name")) {
+            stringBuffer.append(modId);
         }
     }
 

@@ -27,7 +27,6 @@ import net.minecraftforge.network.filters.NetworkFilters;
 import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.server.command.ForgeCommand;
 import net.minecraftforge.server.permission.events.PermissionGatherEvent;
-import net.minecraftforge.server.command.ConfigCommand;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.invoke.MethodHandles;
@@ -86,7 +85,8 @@ public final class ForgeInternalHandler {
     @SubscribeEvent
     static void onCommandsRegister(RegisterCommandsEvent event) {
         new ForgeCommand(event.getDispatcher());
-        ConfigCommand.register(event.getDispatcher());
+        // TODO [ModuleLoader] Configs are disabled until the new config system is ready
+        //ConfigCommand.register(event.getDispatcher());
     }
 
     private static LootModifierManager INSTANCE;

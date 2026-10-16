@@ -5,13 +5,9 @@
 
 package net.minecraftforge.fml.event.lifecycle;
 
-import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.eventbus.api.bus.EventBus;
+import org.jetbrains.annotations.ApiStatus;
 import net.minecraftforge.eventbus.api.event.characteristic.SelfDestructing;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.DeferredWorkQueue;
-import net.minecraftforge.fml.ModLoadingStage;
-import net.minecraftforge.fml.event.IModBusEvent;
 
 import java.util.function.Consumer;
 
@@ -21,22 +17,14 @@ import java.util.function.Consumer;
  * Called after {@link net.minecraftforge.registries.RegisterEvent} events have been fired and before 
  * {@link FMLClientSetupEvent} or {@link FMLDedicatedServerSetupEvent} during mod startup.
  * <br><br>
- * Either register your listener using {@link net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber} and
- * {@link net.minecraftforge.eventbus.api.listener.SubscribeEvent} or
- * {@link net.minecraftforge.eventbus.api.bus.EventBus#addListener(Consumer)} in your constructor.
+ * Register your listener with {@link net.minecraftforge.eventbus.api.bus.EventBus#addListener(Consumer)} on
+ * {@link #BUS} in your mod's entrypoint constructor.
  * <br><br>
- * Most non-specific mod setup will be performed here. Note that this is a parallel dispatched event - you cannot
- * interact with game state in this event.
- *
- * @see DeferredWorkQueue to enqueue work to run on the main game thread after this event has
- * completed dispatch
+ * Most non-specific mod setup will be performed here.
  */
 public final class FMLCommonSetupEvent extends ParallelDispatchEvent implements SelfDestructing {
-    public static EventBus<FMLCommonSetupEvent> getBus(BusGroup modBusGroup) {
-        return IModBusEvent.getBus(modBusGroup, FMLCommonSetupEvent.class);
-    }
+    public static final EventBus<FMLCommonSetupEvent> BUS = EventBus.create(FMLCommonSetupEvent.class);
 
-    public FMLCommonSetupEvent(final ModContainer container, final ModLoadingStage stage) {
-        super(container, stage);
-    }
+    @ApiStatus.Internal
+    public FMLCommonSetupEvent() {}
 }

@@ -1,10 +1,11 @@
 --- a/net/minecraft/client/gui/screens/PauseScreen.java
 +++ b/net/minecraft/client/gui/screens/PauseScreen.java
-@@ -163,6 +_,7 @@
+@@ -163,6 +_,8 @@
              helper.addChild(this.openScreenButton(OPTIONS, () -> new OptionsScreen(this, this.minecraft.options)));
              helper.addChild(this.openScreenButton(WORLD_OPTIONS, () -> new WorldOptionsScreen(this, this.minecraft.level)));
          }
-+        helper.addChild(Button.builder(Component.translatable("fml.menu.mods"), button -> this.minecraft.gui.setScreen(new net.minecraftforge.client.gui.ModListScreen(this))).width(BUTTON_WIDTH_FULL).build(), 2);
++        // TODO [ModuleLoader] Mods button, the mod list screen is being replaced
++        //helper.addChild(Button.builder(Component.translatable("fml.menu.mods"), button -> this.minecraft.gui.setScreen(new net.minecraftforge.client.gui.ModListScreen(this))).width(BUTTON_WIDTH_FULL).build(), 2);
  
          this.disconnectButton = helper.addChild(
              Button.builder(

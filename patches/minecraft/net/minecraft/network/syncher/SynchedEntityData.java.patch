@@ -1,18 +1,23 @@
 --- a/net/minecraft/network/syncher/SynchedEntityData.java
 +++ b/net/minecraft/network/syncher/SynchedEntityData.java
-@@ -27,11 +_,13 @@
+@@ -27,13 +_,13 @@
      }
  
      public static <T> EntityDataAccessor<T> defineId(final Class<? extends SyncedDataHolder> clazz, final EntityDataSerializer<T> type) {
 -        if (LOGGER.isDebugEnabled()) {
-+        if (true) { // Forge: This is very useful for mods that register keys on classes that are not their own
-             try {
-                 Class<?> aClass = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
-                 if (!aClass.equals(clazz)) {
+-            try {
+-                Class<?> aClass = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
+-                if (!aClass.equals(clazz)) {
 -                    LOGGER.debug("defineId called for: {} from {}", clazz, aClass, new RuntimeException());
-+                    // Forge: log at warn, mods should not add to classes that they don't own, and only add stacktrace when in debug is enabled as it is mostly not needed and consumes time
-+                    if (LOGGER.isDebugEnabled()) LOGGER.warn("defineId called for: {} from {}", clazz, aClass, new RuntimeException());
-+                    else LOGGER.warn("defineId called for: {} from {}", clazz, aClass);
-                 }
-             } catch (ClassNotFoundException var3) {
+-                }
+-            } catch (ClassNotFoundException var3) {
++        if (true) { // Forge: This is very useful for mods that register keys on classes that are not their own
++            // Forge: StackWalker avoids capturing the whole stack, and finds the caller's class even if it's in another module layer
++            Class<?> aClass = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass();
++            if (!aClass.equals(clazz)) {
++                // Forge: log at warn, mods should not add to classes that they don't own, and only add stacktrace when in debug is enabled as it is mostly not needed and consumes time
++                if (LOGGER.isDebugEnabled()) LOGGER.warn("defineId called for: {} from {}", clazz, aClass, new RuntimeException());
++                else LOGGER.warn("defineId called for: {} from {}", clazz, aClass);
              }
+         }
+ 

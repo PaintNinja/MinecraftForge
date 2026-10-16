@@ -133,7 +133,6 @@ import net.minecraftforge.client.textures.TextureAtlasSpriteLoaderManager;
 import net.minecraftforge.common.ForgeI18n;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.eventbus.api.bus.CancellableEventBus;
-import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.network.NetworkContext;
 import net.minecraftforge.network.NetworkInitialization;
@@ -161,7 +160,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -435,20 +433,12 @@ public final class ForgeHooksClient {
             int wantedVer = NetworkInitialization.getVersion();
             boolean fmlNetMatches = fmlver == wantedVer;
             boolean channelsMatch = NetworkRegistry.checkListPingCompatibilityForClient(remoteChannels);
-            AtomicBoolean result = new AtomicBoolean(true);
+            // TODO [ModuleLoader] Test each mod's DisplayTest against the server's version again once it's replaced
             final List<String> extraClientMods = new ArrayList<>();
-            ModList.forEachModContainer((modid, mc) ->
-                    mc.getCustomExtension(IExtensionPoint.DisplayTest.class).ifPresent(ext-> {
-                        boolean foundModOnServer = ext.remoteVersionTest().test(mods.get(modid), true);
-                        result.compareAndSet(true, foundModOnServer);
-                        if (!foundModOnServer)
-                            extraClientMods.add(modid);
-                    })
-            );
-            boolean modsMatch = result.get();
+            boolean modsMatch = true;
 
             final Map<String, String> extraServerMods = mods.entrySet().stream().
-                    filter(e -> !IExtensionPoint.DisplayTest.IGNORESERVERONLY.equals(e.getValue())).
+                    filter(e -> !ServerStatusPing.IGNORE_SERVER_ONLY.equals(e.getValue())).
                     filter(e -> !ModList.isLoaded(e.getKey())).
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 

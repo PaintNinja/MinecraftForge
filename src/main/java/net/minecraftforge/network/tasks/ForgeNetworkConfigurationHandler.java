@@ -31,6 +31,7 @@ public final class ForgeNetworkConfigurationHandler {
         // Sync all of our registry mappings
         event.addTask(new SyncRegistriesTask());
         // Lastly sync raw mod config files. We send raw file bytes, which is very inefficient, but we can change it later. //TODO: Compress/Optimize config file data
-        event.addTask(new SyncConfigTask());
+        // TODO [ModuleLoader] Configs are disabled until the new config system is ready
+        //event.addTask(new SyncConfigTask());
     }
 }

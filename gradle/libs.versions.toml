@@ -11,16 +11,15 @@ changelog   = { id = "net.minecraftforge.changelog",       version = "3.2.2" }
 download    = { id = "de.undercouch.download",             version = "5.6.0" }
 jarsigner   = { id = "net.minecraftforge.gradlejarsigner", version = "1.2.1" }
 apt         = { id = "com.diffplug.eclipse.apt",           version = "4.4.1" }
+extra-java-module-info = { id = "org.gradlex.extra-java-module-info", version = "1.14.2" }
 
 
 [versions]
 eventbus     = "7.0.6"
-mixinextras  = "0.5.4"
-bootstrap    = "2.1.8"
+mixinextras  = "0.5.5"
 asm          = "9.10.1"
 jline        = "3.25.1"
 night-config = "3.7.4"
-jarjar       = "0.4.2"
 log4j        = "2.26.0"
 lwjgl        = "3.4.3"
 gradle       = "9.7.1" # Gradle we bundle with the MDK
@@ -28,14 +27,13 @@ gradle       = "9.7.1" # Gradle we bundle with the MDK
 [libraries]
 # TODO [Forge][Buildscript We should not be needing to manually add transitive dependencies
 #      If we need to make strict versions for dependencies, we should do so using dependency constraints
-forgespi           = { module = "net.minecraftforge:forgespi",           version = "8.0.0"  } # Needs modlauncher
-modlauncher        = { module = "net.minecraftforge:modlauncher",        version = "10.2.6" } # Needs securemodules
-securemodules      = { module = "net.minecraftforge:securemodules",      version = "2.2.24" } # // Needs unsafe
 unsafe             = { module = "net.minecraftforge:unsafe",             version = "0.9.2"  }
-accesstransformers = { module = "net.minecraftforge:accesstransformers", version = "8.2.17" }
-coremods-api       = { module = "net.minecraftforge:coremods-api",       version = "5.3.1"  }
 mergetool-api      = { module = "net.minecraftforge:mergetool-api",      version = "1.0"    }
-maven-artifact     = { module = "org.apache.maven:maven-artifact",       version = "3.8.8"  } # Used for version comparison
+maven-artifact     = { module = "org.apache.maven:maven-artifact",       version = "4.0.0-rc-7" } # Used for version comparison, matches ModuleLoader
+
+# ModuleLoader - Replaces ModLauncher, SecureModules, JarJar, Bootstrap and FML. Published locally for now.
+moduleloader-core   = { module = "ga.ozli.moduleloader.core:core",     version = "1.0-SNAPSHOT" }
+moduleloader-loader = { module = "ga.ozli.moduleloader.loader:loader", version = "1.0-SNAPSHOT" }
 
 slf4j-api          = { module = "org.slf4j:slf4j-api",                   version = "2.0.17" }
 
@@ -47,21 +45,8 @@ jspecify              = { module = "org.jspecify:jspecify",           version = 
 eventbus           = { module = "net.minecraftforge:eventbus",           version.ref = "eventbus" }
 eventbus-validator = { module = "net.minecraftforge:eventbus-validator", version.ref = "eventbus" }
 
-# Bootstrap - Converting the process from normal loader into JPMS land
-bootstrap      = { module = "net.minecraftforge:bootstrap",      version.ref = "bootstrap" }
-bootstrap-api  = { module = "net.minecraftforge:bootstrap-api",  version.ref = "bootstrap" }
-bootstrap-dev  = { module = "net.minecraftforge:bootstrap-dev",  version.ref = "bootstrap" }
-bootstrap-shim = { module = "net.minecraftforge:bootstrap-shim", version.ref = "bootstrap" }
-
-# ReadOnlyInMemoryFileSystem - Used for JarInJar extraction at runtime
-roimfs = { module = "net.minecraftforge:roimfs", version = "1.0.0" }
-# Google's InMemory File System. Used by ForgeDev Tests for now, but could be useful for a lot of things. 
-# ROIMFS is faster if you need read only
-jimfs = { module = "com.google.jimfs:jimfs", version = "1.3.0" }
-
-# Mixin
-mixin              = { module = "org.spongepowered:mixin",                version = "0.8.7" }
-mixinextras-forge  = { module = "io.github.llamalad7:mixinextras-forge",  version.ref = "mixinextras" }
+# Mixin - Fabric's fork, as used by ModuleLoader
+mixin              = { module = "net.fabricmc:sponge-mixin",              version = "0.17.4+mixin.0.8.7" }
 mixinextras-common = { module = "io.github.llamalad7:mixinextras-common", version.ref = "mixinextras" }
 
 # ASM it's used for so many of our hacks
@@ -80,11 +65,6 @@ jline-terminal-jna = { module = "org.jline:jline-terminal-jna", version.ref = "j
 # The core of our configuration system, it has many flaws, but it works for the most part
 night-config-toml = { module = "com.electronwill.night-config:toml", version.ref = "night-config" }
 night-config-core = { module = "com.electronwill.night-config:core", version.ref = "night-config" }
-
-# Jar In Jar FileSystem
-jarjar-fs       = { module = "net.minecraftforge:JarJarFileSystems", version.ref = "jarjar" }
-jarjar-meta     = { module = "net.minecraftforge:JarJarMetadata",    version.ref = "jarjar" }
-jarjar-selector = { module = "net.minecraftforge:JarJarSelector",    version.ref = "jarjar" }
 
 # These are libraries shipped by the MC launcher, try and keep them in sync with the manifest
 # but honestly if we don't it just means we ship them as normal libraries by adding them to the installer config in the forge project
@@ -107,9 +87,6 @@ lwjgl-stb      = { module = "org.lwjgl:lwjgl-stb",    version.ref = "lwjgl" }
 lwjgl-tinyfd   = { module = "org.lwjgl:lwjgl-tinyfd", version.ref = "lwjgl" }
 
 [bundles]
-# Google's InMemory File System. Used by ForgeDev Tests for now, but could be useful for a lot of things.
-jimfs                   = ["guava", "failureaccess"]
-
 # ASM it's used for so many of our hacks
 asm                     = ["asm", "asm-tree", "asm-util", "asm-commons", "asm-analysis"]
 
@@ -119,7 +96,5 @@ terminalconsoleappender = ["terminalconsoleappender", "jline-reader", "jline-ter
 # Utility for reading and writing the TOML file format
 night-config            = ["night-config-toml", "night-config-core"]
 
-# Bundeling dependencies in a single archive
-jarjar                  = ["jarjar-fs", "jarjar-selector", "jarjar-meta"]
 log4j                   = ["log4j-api", "log4j-core"]
 lwjgl                   = ["lwjgl", "lwjgl-sdl", "lwjgl-opengl", "lwjgl-stb", "lwjgl-tinyfd"]

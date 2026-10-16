@@ -158,8 +158,6 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.config.ConfigTracker;
 import net.minecraftforge.network.ConnectionType;
 import net.minecraftforge.network.ForgePayload;
 import net.minecraftforge.network.NetworkContext;
@@ -799,12 +797,12 @@ public final class ForgeHooks {
     public static void writeAdditionalLevelSaveData(WorldData worldData, CompoundTag levelTag) {
         CompoundTag fmlData = new CompoundTag();
         ListTag modList = new ListTag();
-        ModList.getMods().forEach(mi -> {
+        for (var modId : ModList.getModIds()) {
             final CompoundTag mod = new CompoundTag();
-            mod.putString("ModId", mi.getModId());
-            mod.putString("ModVersion", MavenVersionStringHelper.artifactVersionToString(mi.getVersion()));
+            mod.putString("ModId", modId);
+            mod.putString("ModVersion", ModList.getVersion(modId).orElse(""));
             modList.add(mod);
-        });
+        }
         fmlData.put("LoadingModList", modList);
 
         CompoundTag registries = new CompoundTag();
@@ -844,8 +842,9 @@ public final class ForgeHooks {
 
                 String modVersion = mod.getStringOr("ModVersion", null);
                 final var previousVersion = new DefaultArtifactVersion(modVersion);
-                ModList.getModContainerById(modId).ifPresentOrElse(container -> {
-                    final var loadingVersion = container.getModInfo().getVersion();
+                // TODO [ModuleLoader] Libraries count as mods for now, so updating one also shows up here
+                ModList.getModule(modId).ifPresentOrElse(_ -> {
+                    final var loadingVersion = new DefaultArtifactVersion(ModList.getVersion(modId).orElse(""));
                     if (!loadingVersion.equals(previousVersion)) {
                         // Enqueue mismatched versions for bulk event
                         mismatchedVersions.put(modId, previousVersion);
@@ -854,7 +853,7 @@ public final class ForgeHooks {
             }
 
             final var mismatchEvent = new ModMismatchEvent(levelDirectory, mismatchedVersions, missingVersions);
-            ModLoader.postEvent(mismatchEvent);
+            ModMismatchEvent.BUS.post(mismatchEvent);
 
             StringBuilder resolved = new StringBuilder("The following mods have version differences that were marked resolved:");
             StringBuilder unresolved = new StringBuilder("The following mods have version differences that were not resolved:");
@@ -870,7 +869,7 @@ public final class ForgeHooks {
                         : "%s (version %s -> %s, self-resolved)".formatted(modid, diff.oldVersion(), diff.newVersion())
                     );
                 } else {
-                    final var resolver = res.resolver().getModId();
+                    final var resolver = res.resolver();
                     resolved.append(System.lineSeparator())
                     .append(diff.isMissing()
                         ? "%s (version %s -> MISSING, resolved by %s)".formatted(modid, diff.oldVersion(), resolver)
@@ -1126,7 +1125,8 @@ public final class ForgeHooks {
     public static void handleClientConfigurationComplete(Connection connection) {
         if (NetworkContext.get(connection).getType() == ConnectionType.VANILLA) {
             LOGGER.info("Connected to a vanilla server. Catching up missing behaviour.");
-            ConfigTracker.loadDefaultServerConfigs();
+            // TODO [ModuleLoader] Configs are disabled until the new config system is ready
+            //ConfigTracker.loadDefaultServerConfigs();
         } else
             LOGGER.info("Connected to a modded server.");
     }

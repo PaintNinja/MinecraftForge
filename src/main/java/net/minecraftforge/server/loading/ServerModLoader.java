@@ -5,16 +5,13 @@
 
 package net.minecraftforge.server.loading;
 
-import net.minecraftforge.fml.*;
-import net.minecraftforge.logging.CrashReportExtender;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.internal.ModLifecycle;
 import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.server.LanguageHook;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.io.File;
-import java.util.List;
 
 public final class ServerModLoader {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -25,21 +22,14 @@ public final class ServerModLoader {
             throw new IllegalStateException("Unable to access server yet");
         });
         LanguageHook.loadForgeAndMCLangs();
+        // TODO [ModuleLoader] FML wrote a mod loading crash report here and logged the loading warnings
         try {
-            ModLoader.gatherAndInitializeMods(ModWorkManager.syncExecutor(), ModWorkManager.parallelExecutor(), ()->{});
-            ModLoader.loadMods(ModWorkManager.syncExecutor(), ModWorkManager.parallelExecutor(), ()->{});
-            ModLoader.finishMods(ModWorkManager.syncExecutor(), ModWorkManager.parallelExecutor(), ()->{});
-        } catch (LoadingFailedException error) {
+            ModLifecycle.gather();
+            ModLifecycle.load(Dist.DEDICATED_SERVER);
+            ModLifecycle.finish();
+        } catch (RuntimeException | Error e) {
             ServerModLoader.hasErrors = true;
-            // In case its not loaded properly
-            LanguageHook.loadForgeAndMCLangs();
-            CrashReportExtender.dumpModLoadingCrashReport(LOGGER, error, new File("."));
-            throw error;
-        }
-        List<ModLoadingWarning> warnings = ModLoader.getWarnings();
-        if (!warnings.isEmpty()) {
-            LOGGER.warn(Logging.LOADING, "Mods loaded with {} warnings", warnings.size());
-            warnings.forEach(warning -> LOGGER.warn(Logging.LOADING, warning.formatToString()));
+            throw e;
         }
         BusGroup.DEFAULT.startup();
     }

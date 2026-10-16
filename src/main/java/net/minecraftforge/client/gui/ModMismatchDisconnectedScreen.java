@@ -36,7 +36,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.common.ForgeI18n;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkContext.NetworkMismatchData;
 import net.minecraftforge.network.packets.ModVersions;
@@ -68,10 +67,8 @@ public class ModMismatchDisconnectedScreen extends Screen {
         this.listHeight = hasMismatches ? 140 : 0;
 
         this.allModIds = data.mods().keySet().stream().distinct().collect(Collectors.toList());
-        this.presentModUrls = ModList.getMods().stream()
-            .filter(info -> allModIds.contains(info.getModId()))
-            .map(info -> Pair.of(info.getModId(), (String)info.getConfig().getConfigElement("displayURL").orElse("")))
-            .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+        // TODO [ModuleLoader] Link to each mod's homepage again once mods can declare one
+        this.presentModUrls = Map.of();
     }
 
     @Override

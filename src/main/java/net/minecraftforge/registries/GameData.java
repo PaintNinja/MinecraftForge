@@ -44,7 +44,6 @@ import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -56,11 +55,6 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.loot.IGlobalLootModifier;
 import net.minecraftforge.common.util.LogMessageAdapter;
 import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.StartupMessageManager;
-import net.minecraftforge.fml.util.EnhancedRuntimeException;
-import net.minecraftforge.fml.util.thread.EffectiveSide;
 import net.minecraftforge.registries.ForgeRegistries.Keys;
 import net.minecraftforge.registries.IForgeRegistry.AddCallback;
 import net.minecraftforge.registries.IForgeRegistry.BakeCallback;
@@ -158,13 +152,6 @@ public class GameData {
         return RegistryBuilder.<T>of().disableSaving().disableSync();
     }
 
-    static RegistryBuilder<ItemDisplayContext> getItemDisplayContextRegistryBuilder() {
-        return new RegistryBuilder<ItemDisplayContext>()
-            .setMaxID(128 * 2) /* 0 -> 127 gets positive ID, 128 -> 256 gets negative ID */.disableOverrides().disableSaving()
-            .setDefaultKey(Identifier.withDefaultNamespace("none"))
-            .onAdd(ItemDisplayContext.ADD_CALLBACK);
-    }
-
     private static <T> RegistryBuilder<T> makeRegistry(ResourceKey<? extends Registry<T>> key) {
         return new RegistryBuilder<T>().setName(key.identifier()).setMaxID(MAX_VARINT).hasWrapper();
     }
@@ -242,7 +229,7 @@ public class GameData {
         vanillaRegistryOrder = new LinkedHashSet<>(MappedRegistry.getKnownRegistries());
         LOGGER.debug(REGISTRIES, "Vanilla registry order:");
         for (var key : vanillaRegistryOrder)
-            LOGGER.info(REGISTRIES, "\t" + key);
+            LOGGER.debug(REGISTRIES, "\t" + key);
         LOGGER.debug(REGISTRIES, "Vanilla freeze snapshot created");
     }
 
@@ -338,11 +325,10 @@ public class GameData {
                 Registry<?> vanillaRegistry = BuiltInRegistries.REGISTRY.getValue(rootRegistryName);
                 RegisterEvent registerEvent = new RegisterEvent(registryKey, forgeRegistry, vanillaRegistry);
 
-                StartupMessageManager.modLoaderConsumer().ifPresent(s -> s.accept("REGISTERING " + registryKey.identifier()));
                 if (forgeRegistry != null)
                     forgeRegistry.unfreeze();
 
-                ModLoader.postEventWrapContainerInModOrder(registerEvent);
+                RegisterEvent.BUS.post(registerEvent);
 
                 if (forgeRegistry != null)
                     forgeRegistry.freeze();
@@ -534,19 +520,15 @@ public class GameData {
         if (fromRegistry == null) {
             ForgeRegistry<T> toRegistry = to.getRegistry(registryName);
             if (toRegistry == null) {
-                throw new EnhancedRuntimeException("Could not find registry to load: " + registryName){
-                    private static final long serialVersionUID = 1L;
-                    @Override
-                    protected void printStackTrace(WrappedPrintStream stream) {
-                        stream.println("Looking For: " + registryName);
-                        stream.println("Found From:");
-                        for (Identifier name : from.registries.keySet())
-                            stream.println("  " + name);
-                        stream.println("Found To:");
-                        for (Identifier name : to.registries.keySet())
-                            stream.println("  " + name);
-                    }
-                };
+                var message = new StringBuilder("Could not find registry to load: ").append(registryName)
+                    .append("\nLooking For: ").append(registryName)
+                    .append("\nFound From:");
+                for (Identifier name : from.registries.keySet())
+                    message.append("\n  ").append(name);
+                message.append("\nFound To:");
+                for (Identifier name : to.registries.keySet())
+                    message.append("\n  ").append(name);
+                throw new IllegalStateException(message.toString());
             }
             // We found it in to, so lets trust to's state...
             // This happens when connecting to a server that doesn't have this registry.
@@ -564,7 +546,7 @@ public class GameData {
 
 
     public static Multimap<Identifier, Identifier> injectSnapshot(Map<Identifier, ForgeRegistry.Snapshot> snapshot, boolean injectFrozenData, boolean isLocalWorld) {
-        LOGGER.info(REGISTRIES, "Injecting existing registry data into this {} instance", EffectiveSide.get());
+        LOGGER.info(REGISTRIES, "Injecting existing registry data into this instance on thread {}", Thread.currentThread().getName());
         RegistryManager.ACTIVE.registries.forEach((name, reg) -> reg.validateContent(name));
         RegistryManager.ACTIVE.registries.forEach((name, reg) -> reg.dump(name));
         RegistryManager.ACTIVE.registries.forEach((_, reg) -> reg.resetDelegates());
@@ -723,28 +705,5 @@ public class GameData {
         Object2IntMap<Identifier> _new = new Object2IntLinkedOpenHashMap<>();
         frozen.getKeys().stream().filter(key -> !newRegistry.containsKey(key)).forEach(key -> _new.put(key, frozen.getID(key)));
         newRegistry.loadIds(_new, frozen.getOverrideOwners(), new Object2IntLinkedOpenHashMap<>(), remaps, frozen, name);
-    }
-
-    /**
-     * Check a name for a domain prefix, and if not present infer it from the
-     * current active mod container.
-     *
-     * @param name          The name or resource location
-     * @param warnOverrides If true, logs a warning if domain differs from that of
-     *                      the currently currently active mod container
-     *
-     * @return The {@link Identifier} with given or inferred domain
-     */
-    public static Identifier checkPrefix(String name, boolean warnOverrides) {
-        int index = name.lastIndexOf(':');
-        String oldPrefix = index == -1 ? "" : name.substring(0, index).toLowerCase(Locale.ROOT);
-        name = index == -1 ? name : name.substring(index + 1);
-        @SuppressWarnings("removal")
-        String prefix = ModLoadingContext.get().getActiveNamespace();
-        if (warnOverrides && !oldPrefix.equals(prefix) && !oldPrefix.isEmpty()) {
-            LogManager.getLogger().debug("Mod `{}` attempting to register `{}` to the namespace `{}`. This could be intended, but likely means an EventBusSubscriber without a modid.", prefix, name, oldPrefix);
-            prefix = oldPrefix;
-        }
-        return Identifier.fromNamespaceAndPath(prefix, name);
     }
 }

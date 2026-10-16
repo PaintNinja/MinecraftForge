@@ -14,8 +14,8 @@ import java.lang.annotation.Target;
  * This sets the prefix to prepend to test names and templates.
  * <p>
  * If this annotation cannot be found the default behavior is to
- * look for the {@ Mod @Mod} annotation and use the mod id. If that is
- * not found the {@link Class#getSimpleName() simple class name} is used.
+ * use the mod's namespace if the class is a mod entrypoint. Otherwise the
+ * {@link Class#getSimpleName() simple class name} is used.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})

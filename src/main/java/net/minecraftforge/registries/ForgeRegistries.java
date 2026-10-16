@@ -10,7 +10,6 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.world.entity.decoration.painting.PaintingVariant;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.entity.EntityType;
@@ -112,7 +111,6 @@ public class ForgeRegistries {
     public static final RegistryHolder<MapCodec<? extends StructureModifier>> STRUCTURE_MODIFIER_SERIALIZERS = registry(Keys.STRUCTURE_MODIFIER_SERIALIZERS, GameData::makeUnsavedAndUnsynced);
     public static final RegistryHolder<FluidType> FLUID_TYPES = registry(Keys.FLUID_TYPES, GameData::getFluidTypeRegistryBuilder);
     public static final RegistryHolder<HolderSetType> HOLDER_SET_TYPES = registry(Keys.HOLDER_SET_TYPES, GameData::makeUnsavedAndUnsynced);
-    public static final RegistryHolder<ItemDisplayContext> DISPLAY_CONTEXTS = registry(Keys.DISPLAY_CONTEXTS, GameData::getItemDisplayContextRegistryBuilder);
     public static final RegistryHolder<MapCodec<? extends ICondition>> CONDITION_SERIALIZERS = registry(Keys.CONDITION_SERIALIZERS, GameData::makeUnsavedAndUnsynced);
     public static final RegistryHolder<IIngredientSerializer<?>> INGREDIENT_SERIALIZERS = registry(Keys.INGREDIENT_SERIALIZERS, GameData::makeUnsavedAndUnsynced);
 
@@ -153,7 +151,6 @@ public class ForgeRegistries {
         public static final ResourceKey<Registry<MapCodec<? extends StructureModifier>>> STRUCTURE_MODIFIER_SERIALIZERS = key("forge:structure_modifier_serializers");
         public static final ResourceKey<Registry<FluidType>> FLUID_TYPES = key("forge:fluid_type");
         public static final ResourceKey<Registry<HolderSetType>> HOLDER_SET_TYPES = key("forge:holder_set_type");
-        public static final ResourceKey<Registry<ItemDisplayContext>> DISPLAY_CONTEXTS = key("forge:display_contexts");
         public static final ResourceKey<Registry<MapCodec<? extends ICondition>>> CONDITION_SERIALIZERS = key("forge:condition_codecs");
         public static final ResourceKey<Registry<IIngredientSerializer<?>>> INGREDIENT_SERIALIZERS = key("forge:ingredient_serializers");
 

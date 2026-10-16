@@ -10,7 +10,6 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
-import cpw.mods.modlauncher.api.LamdbaExceptionUtils;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
@@ -76,7 +75,7 @@ public class JsonCodecProvider<T> implements DataProvider {
                 : PackOutput.Target.DATA_PACK);
         ImmutableList.Builder<CompletableFuture<?>> futuresBuilder = new ImmutableList.Builder<>();
 
-        gather(LamdbaExceptionUtils.rethrowBiConsumer((id, value) -> {
+        gather((id, value) -> {
             final Path path = outputFolder.resolve(id.getNamespace()).resolve(this.directory).resolve(id.getPath() + ".json");
             JsonElement encoded = this.codec.encodeStart(this.dynamicOps, value)
                   .getOrThrow( msg -> new IllegalStateException(String.format("Failed to encode {}: {}", path, msg)));
@@ -95,7 +94,7 @@ public class JsonCodecProvider<T> implements DataProvider {
             }
             */
             futuresBuilder.add(DataProvider.saveStable(cache, encoded, path));
-        }));
+        });
 
         return CompletableFuture.allOf(futuresBuilder.build().toArray(CompletableFuture[]::new));
     }

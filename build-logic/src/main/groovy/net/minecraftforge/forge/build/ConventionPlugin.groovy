@@ -36,11 +36,13 @@ class ConventionPlugin implements Plugin<Project>, Meta {
             final versions = extensions.create("versions", VersionsExtension, project)
             final convention = extensions.create('convention', ConventionExtension, project)
 
+            // ModuleLoader is a work in progress and gets published to mavenLocal, so mark it as a snapshot to stop Gradle caching stale copies
+            project.version = "${version}-SNAPSHOT"
             logger.lifecycle(name + " " + version)
 
             gradleutils.with {
                 vendor.set('Forge Development LLC')
-                version.set(gitversion.version)
+                version.set(project.provider { project.version.toString() })
             }
             project.setGroup('net.minecraftforge')
 
@@ -59,6 +61,8 @@ class ConventionPlugin implements Plugin<Project>, Meta {
                 it.options.with {
                     encoding = 'UTF-8'
                     compilerArgs << '-Xlint:-unchecked' // This is mainly for vanilla code, but just makes it quiet down outside the IDE
+                    // Gradle doesn't put the version in module-info by default, and mods' versions are read from their module descriptor
+                    javaModuleVersion.set(project.provider { project.version.toString() })
                 }
             }
 
@@ -71,6 +75,7 @@ class ConventionPlugin implements Plugin<Project>, Meta {
                 maven { url = 'https://libraries.minecraft.net/' }
                 mavenCentral()
                 maven gradleutils.forgeMaven
+                maven { url = 'https://maven.fabricmc.net/' } // Fabric's Mixin fork, used by ModuleLoader
                 project.pluginManager.withPlugin('net.minecraftforge.forgedev') {
                     maven forgedev.mavenizer
                 }

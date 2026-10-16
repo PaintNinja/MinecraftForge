@@ -10,10 +10,8 @@ import net.minecraft.client.ClientBootstrap;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.server.Bootstrap;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.internal.ModLifecycle;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.ModWorkManager;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.data.event.GatherDataEvent.DataGeneratorConfig;
 
@@ -99,7 +97,7 @@ public final class DatagenModLoader {
         Bootstrap.bootStrap();
         if (genClient)
             ClientBootstrap.bootstrap();
-        ModLoader.gatherAndInitializeMods(ModWorkManager.syncExecutor(), ModWorkManager.parallelExecutor(), ()->{});
+        ModLifecycle.gather();
         var lookupProvider = CompletableFuture.supplyAsync(VanillaRegistries::createWorldLookup, Util.backgroundExecutor())
                 .thenApplyAsync(VanillaRegistries::createReloadableLookup, Util.backgroundExecutor());
 
@@ -109,11 +107,10 @@ public final class DatagenModLoader {
                 mods.add(pattern);
 
             var m = Pattern.compile('^' + pattern + '$');
-            ModList.forEachModInOrder(mc -> {
-                var id = mc.getModId();
+            for (var id : ModList.getModIds()) {
                 if (!"forge".equals(id) && !"minecraft".equals(id) && m.matcher(id).matches())
                     mods.add(id);
-            });
+            }
         }
         LOGGER.info("Initializing Data Gatherer for mods {}", mods);
 
@@ -127,24 +124,20 @@ public final class DatagenModLoader {
 
         existingFileHelper = new ExistingFileHelper(existingPacks, existingMods, assetIndex, assetsDir);
 
-        if (ModLoader.isLoadingStateValid()) {
-            var projectPaths = loadProjectPaths();
+        var projectPaths = loadProjectPaths();
 
-            for (var mod : ModList.getLoadedMods()) {
-                var projectInfo = loadProjectInfo(mod);
-                var modOutput = projectPaths.isEmpty() || projectInfo.isEmpty()
-                    ? simpleOutput(output, config, mod)
-                    : findOutput(projectPaths, projectInfo, output, config, mod);
+        // There's no per-mod bus anymore, so each mod's event goes to every listener, which check GatherDataEvent#isFor
+        for (var mod : config.getMods().stream().sorted().toList()) {
+            var projectInfo = loadProjectInfo(mod);
+            var modOutput = projectPaths.isEmpty() || projectInfo.isEmpty()
+                ? simpleOutput(output, config, mod)
+                : findOutput(projectPaths, projectInfo, output, config, mod);
 
-                var gen = config.makeGenerator(modOutput, config.getMods().contains(mod.getModId()));
-                var event = new GatherDataEvent(mod, gen, config, existingFileHelper);
-                ModLoader.postEvent(mod, event);
-            }
-
-            config.runAll();
-        } else {
-            LOGGER.error("Cowardly refusing to send event generator to a broken mod state");
+            var gen = config.makeGenerator(modOutput, true);
+            GatherDataEvent.BUS.post(new GatherDataEvent(mod, gen, config, existingFileHelper));
         }
+
+        config.runAll();
 
         return false;
     }
@@ -154,8 +147,10 @@ public final class DatagenModLoader {
         return projectList == null ? Map.of() : loadProps(Path.of(projectList));
     }
 
-    private static Map<String, String> loadProjectInfo(ModContainer mod) {
-        return loadProps(mod.getModInfo().getOwningFile().getFile().findResource(".project_info.properties"));
+    private static Map<String, String> loadProjectInfo(String mod) {
+        return ModList.getRoot(mod)
+                .map(root -> loadProps(root.resolve(".project_info.properties")))
+                .orElse(Map.of());
     }
 
     private static Map<String, String> loadProps(Path target) {
@@ -176,11 +171,11 @@ public final class DatagenModLoader {
         return Map.of();
     }
 
-    private static Path simpleOutput(Path base, DataGeneratorConfig config, ModContainer mod) {
-        return config.isFlat() ? base : base.resolve(mod.getModId());
+    private static Path simpleOutput(Path base, DataGeneratorConfig config, String mod) {
+        return config.isFlat() ? base : base.resolve(mod);
     }
 
-    private static Path findOutput(Map<String, String> projects, Map<String, String> info, Path original, DataGeneratorConfig config, ModContainer mod) {
+    private static Path findOutput(Map<String, String> projects, Map<String, String> info, Path original, DataGeneratorConfig config, String mod) {
         var name = info.get("name");
         var base = projects.get(name);
         var output = info.get("output");
@@ -196,6 +191,6 @@ public final class DatagenModLoader {
 
         if ("true".equals(info.get("flat")))
             return target;
-        return target.resolve(mod.getModId());
+        return target.resolve(mod);
     }
 }

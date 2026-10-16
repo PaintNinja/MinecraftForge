@@ -5,15 +5,6 @@
 
 package net.minecraftforge.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.renderpearl.api.GpuFormat;
-import com.mojang.renderpearl.api.pipeline.BlendFactor;
-import com.mojang.renderpearl.api.pipeline.BlendFunction;
-import com.mojang.renderpearl.api.pipeline.ColorTargetState;
-import com.mojang.renderpearl.api.pipeline.RenderPipeline;
-import com.mojang.renderpearl.api.textures.AddressMode;
-import com.mojang.renderpearl.api.textures.FilterMode;
-import com.mojang.renderpearl.api.textures.GpuSampler;
 
 import net.minecraft.util.Util;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -23,10 +14,8 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.Identifier;
 import net.minecraftforge.common.util.NonNullLazy;
 import net.minecraftforge.common.util.NonNullSupplier;
-import net.minecraftforge.fml.earlydisplay.DisplayWindow;
 
 import java.util.function.Function;
-import org.jetbrains.annotations.ApiStatus;
 
 public enum ForgeRenderTypes {
     ITEM_LAYERED_SOLID(()-> getItemLayeredSolid(blockAtlas())),
@@ -144,15 +133,6 @@ public enum ForgeRenderTypes {
         return Internal.TEXT_GRAYSCALE_SEE_THROUGH.apply(locationIn);
     }
 
-    /**
-     * Render type for rendering the early loading screen, not for modder consumption.
-     *
-     * @param window The early loading screen, so we can grab the buffer ID
-     */
-    @ApiStatus.Internal
-    public static RenderType getLoadingOverlay(DisplayWindow window) {
-        return Internal.getLoadingOverlay(window);
-    }
 
     // ----------------------------------------
     //  Implementation details below this line
@@ -308,26 +288,5 @@ public enum ForgeRenderTypes {
             );
         }
 
-        private static final RenderPipeline LOADING_PIPELINE = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
-                .withLocation("pipeline/forge/loading_overlay")
-                .withColorTargetState(new ColorTargetState(new BlendFunction(BlendFactor.SRC_ALPHA, BlendFactor.ONE)))
-                .build();
-
-        private static final GpuSampler LOADING_SAMPLER = RenderSystem.getSamplerCache().getSampler(AddressMode.REPEAT, AddressMode.REPEAT, FilterMode.NEAREST, FilterMode.NEAREST, false);
-        private static final Identifier LOADING_TEXTURE = Identifier.fromNamespaceAndPath("forge", "loading_overlay");
-
-        public static RenderType getLoadingOverlay(DisplayWindow window) {
-            var gpu = RenderSystem.getDevice();
-            var texture = gpu.createTexture(LOADING_TEXTURE.toString(), 5, GpuFormat.RGBA8_UNORM,
-                    window.context().width(), window.context().height(),
-                    1, window.getFramebufferTextureId());
-            var textureView = gpu.createTextureView(texture);
-
-            return RenderType.create("forge_loading_overlay",
-                RenderSetup.builder(LOADING_PIPELINE)
-                    .withTexture("Sampler0", LOADING_TEXTURE, () -> LOADING_SAMPLER)
-                    .createRenderSetup()
-            );
-        }
     }
 }

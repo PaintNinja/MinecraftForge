@@ -5,12 +5,9 @@
 
 package net.minecraftforge.fml.event.lifecycle;
 
-import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.eventbus.api.bus.EventBus;
+import org.jetbrains.annotations.ApiStatus;
 import net.minecraftforge.eventbus.api.event.characteristic.SelfDestructing;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingStage;
-import net.minecraftforge.fml.event.IModBusEvent;
 
 /**
  * This is the second of four commonly called events during mod lifecycle startup.
@@ -27,11 +24,8 @@ import net.minecraftforge.fml.event.IModBusEvent;
  * This is a parallel dispatch event.
  */
 public final class FMLClientSetupEvent extends ParallelDispatchEvent implements SelfDestructing {
-    public static EventBus<FMLClientSetupEvent> getBus(BusGroup modBusGroup) {
-        return IModBusEvent.getBus(modBusGroup, FMLClientSetupEvent.class);
-    }
+    public static final EventBus<FMLClientSetupEvent> BUS = EventBus.create(FMLClientSetupEvent.class);
 
-    public FMLClientSetupEvent(ModContainer container, ModLoadingStage stage) {
-        super(container, stage);
-    }
+    @ApiStatus.Internal
+    public FMLClientSetupEvent() {}
 }

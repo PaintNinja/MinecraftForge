@@ -5,39 +5,19 @@
 
 package net.minecraftforge.fml.event.lifecycle;
 
-import net.minecraftforge.fml.InterModComms;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.event.IModBusEvent;
-
-import java.util.function.Predicate;
-import java.util.stream.Stream;
+import net.minecraftforge.eventbus.api.event.InheritableEvent;
 
 /**
- * Parent type to all ModLifecycle events. This is based on Forge EventBus. They fire through the
- * ModContainer's eventbus instance.
+ * Parent type to all mod lifecycle events. Each is posted once on its {@code BUS}, in the order set by
+ * {@link net.minecraftforge.internal.ModLifecycle}.
  */
-public abstract class ModLifecycleEvent implements IModBusEvent {
-    private final ModContainer container;
-
-    protected ModLifecycleEvent(ModContainer container) {
-        this.container = container;
-    }
+// TODO [ModuleLoader] The IMC streams (getIMCStream) were removed with FML's InterModComms
+public abstract class ModLifecycleEvent implements InheritableEvent {
+    protected ModLifecycleEvent() {}
 
     public final String description() {
        String cn = getClass().getName();
        return cn.substring(cn.lastIndexOf('.')+1);
-    }
-
-    public Stream<InterModComms.IMCMessage> getIMCStream() {
-        return InterModComms.getMessages(this.container.getModId());
-    }
-
-    public Stream<InterModComms.IMCMessage> getIMCStream(Predicate<String> methodFilter) {
-        return InterModComms.getMessages(this.container.getModId(), methodFilter);
-    }
-
-    ModContainer getContainer() {
-        return this.container;
     }
 
     @Override

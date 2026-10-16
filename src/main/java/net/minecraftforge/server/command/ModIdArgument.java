@@ -13,7 +13,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 
 import java.util.Arrays;
@@ -35,7 +34,7 @@ public class ModIdArgument implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder) {
-        return SharedSuggestionProvider.suggest(ModList.applyForEachModContainer(ModContainer::getModId), builder);
+        return SharedSuggestionProvider.suggest(ModList.getModIds(), builder);
     }
 
     @Override

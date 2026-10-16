@@ -1,6 +1,7 @@
 package com.example.examplemod;
 
 import com.mojang.logging.LogUtils;
+import ga.ozli.novamodloader.api.ModuleLoaderMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.food.FoodProperties;
@@ -12,23 +13,20 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 
-// The value here should match an entry in the META-INF/mods.toml file
-@Mod(ExampleMod.MODID)
-public final class ExampleMod {
-    // Define mod id in a common place for everything to reference
+import java.lang.invoke.MethodHandles;
+
+// Mods are loaded through the entrypoints they provide in module-info.java. This one is loaded on both sides.
+public final class ExampleMod implements ModuleLoaderMod.Common {
+    // Define mod id in a common place for everything to reference. This must match the module name in module-info.java
     public static final String MODID = "examplemod";
     // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -72,27 +70,28 @@ public final class ExampleMod {
                 output.accept(EXAMPLE_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
             }).build());
 
-    public ExampleMod(FMLJavaModLoadingContext context) {
-        var modBusGroup = context.getModBusGroup();
-
+    public ExampleMod() {
         // Register the commonSetup method for modloading
-        FMLCommonSetupEvent.getBus(modBusGroup).addListener(this::commonSetup);
+        FMLCommonSetupEvent.BUS.addListener(this::commonSetup);
 
-        // Register the Deferred Register to the mod event bus so blocks get registered
-        BLOCKS.register(modBusGroup);
-        // Register the Deferred Register to the mod event bus so items get registered
-        ITEMS.register(modBusGroup);
-        // Register the Deferred Register to the mod event bus so tabs get registered
-        CREATIVE_MODE_TABS.register(modBusGroup);
+        // Register the Deferred Register so blocks get registered
+        BLOCKS.register(this);
+        // Register the Deferred Register so items get registered
+        ITEMS.register(this);
+        // Register the Deferred Register so tabs get registered
+        CREATIVE_MODE_TABS.register(this);
 
         // Register the item to a creative tab
         BuildCreativeModeTabContentsEvent.BUS.addListener(ExampleMod::addCreative);
 
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
-        context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        // TODO [ModuleLoader] Config registration, pending the config system redesign
+        //context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+        Config.onLoad();
+
         // Some common setup code
         LOGGER.info("HELLO FROM COMMON SETUP");
 
@@ -110,11 +109,14 @@ public final class ExampleMod {
             event.accept(EXAMPLE_BLOCK_ITEM);
     }
 
-    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-    @Mod.EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
-    public static class ClientModEvents {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
+    // This entrypoint is only loaded on the client, so it's safe to reference client-only classes from here
+    public static final class Client implements ModuleLoaderMod.Client {
+        public Client() {
+            // Qualified because the bare name resolves to the ModuleLoaderMod.Client interface this class inherits
+            FMLClientSetupEvent.BUS.addListener(ExampleMod.Client::onClientSetup);
+        }
+
+        private static void onClientSetup(FMLClientSetupEvent event) {
             // Some client setup code
             LOGGER.info("HELLO FROM CLIENT SETUP");
             LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());

@@ -7,11 +7,6 @@ package net.minecraftforge.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.forgespi.language.IModInfo;
-
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -24,7 +19,7 @@ public class ConfigScreenHandler
      *                       <p>You should call {@link Minecraft#setScreen(Screen)} with the provided client instance
      *                       and mods screen for the action of your close button.</p>
      */
-    public record ConfigScreenFactory(BiFunction<Minecraft, Screen, Screen> screenFunction) implements IExtensionPoint<ConfigScreenFactory> {
+    public record ConfigScreenFactory(BiFunction<Minecraft, Screen, Screen> screenFunction) {
         /**
          * @param screenFunction A function that takes the mods screen as an argument and returns your config screen to
          *                       show when the player clicks the config button for your mod on the mods screen.
@@ -37,9 +32,5 @@ public class ConfigScreenHandler
         }
     }
 
-    public static Optional<BiFunction<Minecraft, Screen, Screen>> getScreenFactoryFor(IModInfo selectedMod)
-    {
-        return ModList.getModContainerById(selectedMod.getModId()).
-                flatMap(mc -> mc.getCustomExtension(ConfigScreenFactory.class).map(ConfigScreenFactory::screenFunction));
-    }
+    // TODO [ModuleLoader] Look up a mod's config screen again once FML's extension points are replaced, ideally by an annotation on its module-info
 }

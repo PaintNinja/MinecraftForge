@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import net.minecraftforge.fml.Logging;
-import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -46,7 +45,7 @@ import org.jetbrains.annotations.Nullable;
  * and other things Forge configs would find useful.
  */
 //TODO: Remove extends and pipe everything through getSpec/getValues?
-public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> implements IConfigSpec<ForgeConfigSpec> {
+public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> {
     private final Map<List<String>, String> levelComments;
     private final Map<List<String>, String> levelTranslationKeys;
 
@@ -94,12 +93,10 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
         this.afterReload();
     }
 
-    @Override
     public void acceptConfig(final CommentedConfig data) {
         setConfig(data);
     }
 
-    @Override
     public boolean isCorrecting() {
         return isCorrecting;
     }
@@ -116,7 +113,6 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
         return this.values;
     }
 
-    @Override
     public void afterReload() {
         this.resetCaches(getValues());
     }
@@ -137,13 +133,11 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
         }
     }
 
-    @Override
     public synchronized boolean isCorrect(CommentedConfig config) {
         LinkedList<String> parentPath = new LinkedList<>();
         return correct(this.config, config, parentPath, Collections.unmodifiableList( parentPath ), (_, _, _, _) -> {}, null, true) == 0;
     }
 
-    @Override
     public int correct(CommentedConfig config) {
         return correct(config, (_, _, _, _) -> {}, null);
     }
@@ -852,7 +846,9 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
             Objects.requireNonNull(spec, "Cannot get config value before spec is built");
             // TODO: Remove this dev-time check so this errors out on both production and dev
             // This is dev-time-only in 1.19.x, to avoid breaking already published mods while forcing devs to fix their errors
-            if (!FMLEnvironment.production) {
+            // TODO [ModuleLoader] Configs aren't loaded until the new config system is ready, so values fall back to their
+            //  defaults instead of throwing in dev. Re-enable this check once configs load again.
+            if (false && !FMLEnvironment.production) {
                 // When the above if-check is removed, change message to "Cannot get config value before config is loaded"
                 if (spec.childConfig == null) {
                     throw new IllegalStateException("""

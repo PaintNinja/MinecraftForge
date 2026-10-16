@@ -49,24 +49,14 @@
          this.window.setAllowCursorChanges(this.options.allowCursorChanges().get());
          this.window.setQuitShortcuts(this.options.quitShortcuts().get());
          if (InputQuirks.EMULATE_RIGHT_CLICK_WITH_CTRL_KEY) {
-@@ -721,14 +_,15 @@
-             .createReload(Util.backgroundExecutor().forName("resourceLoad"), this, RESOURCE_RELOAD_INITIAL_TASK, packs);
-         GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_LOADING_OVERLAY_MS);
-         GameLoadCookie loadCookie = new GameLoadCookie(realmsClient, gameConfig.quickPlay);
--        this.gui.setOverlay(new LoadingOverlay(this, reloadInstance, maybeT -> Util.ifElse(maybeT, t -> this.rollbackResourcePacks(t, loadCookie), () -> {
-+        this.gui.setOverlay(net.minecraftforge.fml.loading.ImmediateWindowHandler.<LoadingOverlay>loadingOverlay(() -> this, () ->reloadInstance, maybeT -> Util.ifElse(maybeT, t -> this.rollbackResourcePacks(t, loadCookie), () -> {
-             if (SharedConstants.IS_RUNNING_IN_IDE) {
-                 this.selfTest();
-             }
+@@ -728,6 +_,7 @@
  
              this.reloadStateTracker.finishReload();
              this.onResourceLoadFinished(loadCookie);
--        }), false));
 +            net.minecraftforge.client.loading.ClientModLoader.completeModLoading();
-+        }), false).get());
+         }), false));
          this.quickPlayLog = QuickPlayLog.of(gameConfig.quickPlay.logPath());
          this.framerateLimitTracker = new FramerateLimitTracker(this.options, this);
-         this.fpsPieProfiler = new ContinuousProfiler(Util.timeSource(), () -> this.fpsPieRenderTicks, this.framerateLimitTracker::isHeavilyThrottled);
 @@ -812,6 +_,7 @@
          StringBuilder builder = new StringBuilder("Minecraft");
          if (checkModStatus().shouldReportAsModified()) {
@@ -93,11 +83,12 @@
              this.clearResourcePacksOnError(t, null, loadCookie);
          } else {
              Util.throwAsRuntime(t);
-@@ -1148,6 +_,7 @@
+@@ -1148,6 +_,8 @@
              FreeTypeUtil.destroy();
              this.windowSurface.close();
              RenderSystem.shutdownRenderer();
-+            net.minecraftforge.fml.config.ConfigTracker.forceUnload();
++            // TODO [ModuleLoader] Configs are disabled until the new config system is ready
++            //net.minecraftforge.fml.config.ConfigTracker.forceUnload();
          } catch (Throwable t) {
              LOGGER.error("Shutdown failure!", t);
              throw t;

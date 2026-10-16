@@ -22,7 +22,7 @@ public @interface GameTestNamespace {
      * It it recommended that this is your modid, but if you have multiple test mods that
      * you want to group together you can use this to do so.
      * <p>
-     * This will default to your modid if it is on the same class that is annotated with {@link net.minecraftforge.fml.common.Mod @Mod}
+     * This defaults to the namespace of the mod the class is in, which is its module name.
      */
     String value() default "";
 }

@@ -35,8 +35,6 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.config.ConfigTracker;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -71,7 +69,8 @@ public class ServerLifecycleHooks {
         currentServer = server;
         // on the dedi server we need to force the stuff to setup properly
         LogicalSidedProvider.setServer(()->server);
-        ConfigTracker.loadConfigs(ModConfig.Type.SERVER, getServerConfigPath(server));
+        // TODO [ModuleLoader] Configs are disabled until the new config system is ready
+        //ConfigTracker.loadConfigs(ModConfig.Type.SERVER, getServerConfigPath(server));
         runModifiers(server);
         return !ServerAboutToStartEvent.BUS.post(new ServerAboutToStartEvent(server));
     }
@@ -98,7 +97,7 @@ public class ServerLifecycleHooks {
             latch.countDown();
             exitLatch = null;
         }
-        ConfigTracker.unloadConfigs(ModConfig.Type.SERVER, getServerConfigPath(server));
+        //ConfigTracker.unloadConfigs(ModConfig.Type.SERVER, getServerConfigPath(server));
     }
 
     public static MinecraftServer getCurrentServer() {

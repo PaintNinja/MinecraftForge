@@ -18,20 +18,16 @@ import net.minecraft.client.gui.screens.worldselection.PresetEditor;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.event.IModBusEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.eventbus.api.event.InheritableEvent;
 
 /**
  * <p>Event for registering {@link PresetEditor} screen factories for world presets.</p>
  *
- * <p>This event is fired on the {@linkplain FMLJavaModLoadingContext#getModBusGroup() mod BusGroup},
+ * <p>This event is fired on the {@linkplain BusGroup#DEFAULT default BusGroup},
  * only on the {@linkplain LogicalSide#CLIENT logical client}.</p>
  */
-public final class RegisterPresetEditorsEvent implements SelfDestructing, IModBusEvent {
-    public static EventBus<RegisterPresetEditorsEvent> getBus(BusGroup modBusGroup) {
-        return IModBusEvent.getBus(modBusGroup, RegisterPresetEditorsEvent.class);
-    }
+public final class RegisterPresetEditorsEvent implements SelfDestructing, InheritableEvent {
+    public static final EventBus<RegisterPresetEditorsEvent> BUS = EventBus.create(RegisterPresetEditorsEvent.class);
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -48,7 +44,7 @@ public final class RegisterPresetEditorsEvent implements SelfDestructing, IModBu
     public void register(ResourceKey<WorldPreset> key, PresetEditor editor) {
         PresetEditor old = this.editors.put(key, editor);
         if (old != null) {
-            LOGGER.debug("PresetEditor {} overridden by mod {}", key.identifier(), ModLoadingContext.get().getActiveNamespace());
+            LOGGER.debug("PresetEditor {} overridden", key.identifier());
         }
     }
 }

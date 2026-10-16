@@ -5,6 +5,7 @@
 
 package net.minecraftforge.common;
 
+import ga.ozli.novamodloader.api.ModuleLoaderMod;
 import net.minecraft.DetectedVersion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
@@ -27,7 +28,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.material.Fluid;
@@ -63,14 +63,10 @@ import net.minecraftforge.common.world.NoneBiomeModifier;
 import net.minecraftforge.common.world.NoneStructureModifier;
 import net.minecraftforge.common.world.StructureModifier;
 import net.minecraftforge.event.network.GatherLoginConfigurationTasksEvent;
-import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.*;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.*;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.*;
 import net.minecraftforge.registries.holdersets.AndHolderSet;
@@ -111,7 +107,6 @@ import net.minecraftforge.common.crafting.ingredients.DifferenceIngredient;
 import net.minecraftforge.common.crafting.ingredients.IIngredientSerializer;
 import net.minecraftforge.common.crafting.ingredients.IntersectionIngredient;
 import net.minecraftforge.common.crafting.ingredients.NBTIngredient;
-import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import com.mojang.serialization.MapCodec;
@@ -120,11 +115,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
-@Mod("forge")
-public class ForgeMod {
-    public static final String VERSION_CHECK_CAT = "version_checking";
+public final class ForgeMod implements ModuleLoaderMod.Common {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker FORGEMOD = MarkerManager.getMarker("FORGEMOD");
 
@@ -357,50 +349,42 @@ public class ForgeMod {
         enableMilkFluid = true;
     }
 
-    public ForgeMod(FMLJavaModLoadingContext context) {
+    public ForgeMod() {
         LOGGER.info(FORGEMOD,"Forge mod loading, version {}, for MC {} with MCP {}", ForgeVersion.getVersion(), MCPVersion.getMCVersion(), MCPVersion.getMCPVersion());
         INSTANCE = this;
         MinecraftForge.initialize();
-        CrashReportCallables.registerCrashCallable("Crash Report UUID", ()-> {
-            final UUID uuid = UUID.randomUUID();
-            LOGGER.fatal("Preparing crash report with UUID {}", uuid);
-            return uuid.toString();
-        });
-
+        // TODO [ModuleLoader] Add the crash report UUID, FML and Forge system report details back
         hackDNSResolver();
 
         NetworkInitialization.init();
 
-        CrashReportCallables.registerCrashCallable("FML", ForgeVersion::getSpec);
-        CrashReportCallables.registerCrashCallable("Forge", ()->ForgeVersion.getGroup()+":"+ForgeVersion.getVersion());
-
-        BusGroup modBusGroup = context.getModBusGroup();
         // Forge-provided datapack registries
         DataPackRegistryEvent.NewRegistry.BUS.addListener(event -> {
             event.dataPackRegistry(ForgeRegistries.Keys.BIOME_MODIFIERS, BiomeModifier.DIRECT_CODEC);
             event.dataPackRegistry(ForgeRegistries.Keys.STRUCTURE_MODIFIERS, StructureModifier.DIRECT_CODEC);
         });
-        FMLCommonSetupEvent.getBus(modBusGroup).addListener(ForgeMod::preInit);
-        GatherDataEvent.getBus(modBusGroup).addListener(ForgeMod::gatherData);
-        var registerEventBus = RegisterEvent.getBus(modBusGroup);
-        registerEventBus.addListener(ForgeMod::registerFluids);
-        registerEventBus.addListener(ForgeMod::registerVanillaDisplayContexts);
+        FMLCommonSetupEvent.BUS.addListener(ForgeMod::preInit);
+        GatherDataEvent.BUS.addListener(event -> {
+            if (event.isFor(this)) gatherData(event);
+        });
+        RegisterEvent.BUS.addListener(ForgeMod::registerFluids);
         EntityAttributeModificationEvent.BUS.addListener(ForgeMod::onRegisterAttributes);
-        ForgeDeferredRegistriesSetup.setup(modBusGroup);
+        ForgeDeferredRegistriesSetup.setup(this);
         for (var reg : registries)
-            reg.register(modBusGroup);
+            reg.register(this);
 
-        context.registerConfig(ModConfig.Type.CLIENT, ForgeConfig.clientSpec);
-        context.registerConfig(ModConfig.Type.SERVER, ForgeConfig.serverSpec);
-        context.registerConfig(ModConfig.Type.COMMON, ForgeConfig.commonSpec);
-        if (ForgeConfig.LOGGER.isDebugEnabled()) {
-            ModConfigEvent.Loading.getBus(modBusGroup).addListener(ForgeConfig::onLoad);
-            ModConfigEvent.Reloading.getBus(modBusGroup).addListener(ForgeConfig::onFileChange);
-        }
+        // TODO [ModuleLoader] Config registration, pending the config system redesign
+        //context.registerConfig(ModConfig.Type.CLIENT, ForgeConfig.clientSpec);
+        //context.registerConfig(ModConfig.Type.SERVER, ForgeConfig.serverSpec);
+        //context.registerConfig(ModConfig.Type.COMMON, ForgeConfig.commonSpec);
+        //if (ForgeConfig.LOGGER.isDebugEnabled()) {
+        //    ModConfigEvent.Loading.BUS.addListener(ForgeConfig::onLoad);
+        //    ModConfigEvent.Reloading.BUS.addListener(ForgeConfig::onFileChange);
+        //}
 
         // Forge does not display problems when the remote is not matching.
-        context.registerDisplayTest(IExtensionPoint.DisplayTest.IGNORE_ALL_VERSION);
-        StartupMessageManager.addModMessage("Forge version "+ForgeVersion.getVersion());
+        // TODO [ModuleLoader] Display test registration, pending the extension point redesign
+        //context.registerDisplayTest(IExtensionPoint.DisplayTest.IGNORE_ALL_VERSION);
 
         ForgeInternalHandler.register();
         GatherLoginConfigurationTasksEvent.BUS.addListener(ForgeNetworkConfigurationHandler::gatherInit);
@@ -413,7 +397,7 @@ public class ForgeMod {
     }
 
     private static void preInit(FMLCommonSetupEvent evt) {
-        VersionChecker.startVersionCheck();
+        // TODO [ModuleLoader] Start the update check again once VersionChecker is reworked
         //VanillaPacketSplitter.register();
     }
 
@@ -505,18 +489,6 @@ public class ForgeMod {
                 helper.register(MILK.getId(), new ForgeFlowingFluid.Source(properties));
                 helper.register(FLOWING_MILK.getId(), new ForgeFlowingFluid.Flowing(properties));
             });
-        }
-    }
-
-    private static void registerVanillaDisplayContexts(RegisterEvent event) {
-        if (event.getRegistryKey().equals(ForgeRegistries.Keys.DISPLAY_CONTEXTS)) {
-            IForgeRegistryInternal<ItemDisplayContext> forgeRegistry = (IForgeRegistryInternal<ItemDisplayContext>) event.<ItemDisplayContext>getForgeRegistry();
-            if (forgeRegistry == null)
-                throw new IllegalStateException("Item display context was not a forge registry, wtf???");
-
-            Arrays.stream(ItemDisplayContext.values())
-                .filter(Predicate.not(ItemDisplayContext::isModded))
-                .forEach(ctx -> forgeRegistry.register(ctx.getId(), Identifier.fromNamespaceAndPath("minecraft", ctx.getSerializedName()), ctx));
         }
     }
 

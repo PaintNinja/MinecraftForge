@@ -28,9 +28,6 @@ import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraftforge.fml.Logging;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.ModLoadingStage;
-import net.minecraftforge.fml.ModLoadingWarning;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -43,9 +40,23 @@ public class ResourcePackLoader {
         resourcePacks.addPackFinder(repo -> findPacks(repo, client));
     }
 
+    /**
+     * The mods that may have resources. A module with a module-info that doesn't require Minecraft is a library, so
+     * only automatic modules and modules that require Minecraft are searched.
+     */
+    private static List<String> getPackModIds() {
+        return ModList.getModIds().stream()
+                .filter(id -> ModList.getModule(id)
+                        .map(Module::getDescriptor)
+                        .filter(descriptor -> descriptor.isAutomatic() || descriptor.requires().stream().anyMatch(r -> r.name().equals("minecraft")))
+                        .isPresent())
+                .toList();
+    }
+
     public static List<String> getPackNames() {
-        return ModList.applyForEachModFile(mf -> "mod:" + mf.getModInfos().getFirst().getModId())
-                .filter(n -> !n.equals("mod:minecraft"))
+        return getPackModIds().stream()
+                .filter(id -> !id.equals("minecraft"))
+                .map(id -> "mod:" + id)
                 .toList();
     }
 
@@ -54,11 +65,10 @@ public class ResourcePackLoader {
         order.add("vanilla");
         order.add("mod_resources");
 
-        ModList.getModFiles().stream()
-                .filter(mf -> mf.requiredLanguageLoaders().stream().noneMatch(ls->ls.languageName().equals("minecraft")))
-                .map(e -> e.getMods().getFirst().getModId())
-                .map(e -> "mod:" + e)
-                .forEach(order::add);
+        for (var id : getPackModIds()) {
+            if (!id.equals("minecraft"))
+                order.add("mod:" + id);
+        }
 
         final Object2IntMap<String> order_f = new Object2IntOpenHashMap<>(order.size());
         for (int x = 0; x < order.size(); x++)
@@ -83,18 +93,21 @@ public class ResourcePackLoader {
         var version = DetectedVersion.BUILT_IN.packVersion(type);
         var hiddenPacks = new ArrayList<PackResources>();
 
-        for (var mod : ModList.getModFiles()) {
-            if (mod.requiredLanguageLoaders().stream().anyMatch(ls -> ls.languageName().equals("minecraft")))
+        // Vanilla's resources come from VanillaPackResources. Forge's id points at the same merged jar for now, so its
+        // pack also contains vanilla's files.
+        // TODO [ModuleLoader] Revisit once Forge is split into its own module
+        for (var modId : getPackModIds()) {
+            if (modId.equals("minecraft"))
                 continue;
 
-            var file = mod.getFile();
+            var root = ModList.getRoot(modId).orElse(null);
+            if (root == null)
+                continue;
 
-            var root = file.findResource("");
             var supplier = new PathPackResources.PathResourcesSupplier(root);
 
-            var modinfo = file.getModInfos().getFirst();
-            var name = "mod:" + modinfo.getModId();
-            var info = new PackLocationInfo(name, Component.literal(file.getFileName()), PackSource.DEFAULT, Optional.empty());
+            var name = "mod:" + modId;
+            var info = new PackLocationInfo(name, Component.literal(modId), PackSource.DEFAULT, Optional.empty());
             var meta = Pack.readPackMetadata(info, supplier, version, type);
             Pack pack = null;
             if (meta != null)
@@ -102,13 +115,13 @@ public class ResourcePackLoader {
 
             if (pack == null) {
                 // Vanilla only logs an error, instead of propagating, so handle null and warn that something went wrong
-                LOGGER.warn(Logging.CORE, "Could not find resource pack for mod file {}", file.getFileName());
-                ModLoader.addWarning(new ModLoadingWarning(modinfo, ModLoadingStage.ERROR, "fml.modloading.brokenresources", file));
+                LOGGER.warn(Logging.CORE, "Could not find resource pack for mod {}", modId);
                 continue;
             }
 
-            LOGGER.debug(Logging.CORE, "Generating PackInfo named {} for mod file {}", name, file.getFileName());
-            if (!client || mod.showAsResourcePack())
+            LOGGER.debug(Logging.CORE, "Generating PackInfo named {} for mod {}", name, modId);
+            // TODO [ModuleLoader] Let mods show up as their own resource pack again, mods.toml had a showAsResourcePack option
+            if (!client)
                 packAcceptor.accept(pack);
             else
                 pack.open().forEach(hiddenPacks::add);

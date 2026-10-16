@@ -12,7 +12,6 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.LogMessageAdapter;
 import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.config.ConfigTracker;
 import net.minecraftforge.network.NetworkContext.NetworkMismatchData;
 import net.minecraftforge.network.packets.Acknowledge;
 import net.minecraftforge.network.packets.ChannelVersions;
@@ -216,9 +215,8 @@ public class ForgePacketHandler {
                 var missing = new HashSet<Identifier>();
                 for (var id : missingMods) {
                     var key = Identifier.fromNamespaceAndPath(id, "");
-                    var container = ModList.getModContainerById(id).orElse(null);
-                    if (container != null)
-                        mismatched.put(key, new NetworkMismatchData.Version(container.getModInfo().getVersion().toString(), ""));
+                    if (ModList.isLoaded(id))
+                        mismatched.put(key, new NetworkMismatchData.Version(ModList.getVersion(id).orElse(""), ""));
                     else
                         missing.add(key);
                 }
@@ -252,10 +250,11 @@ public class ForgePacketHandler {
         ctx.setPacketHandled(true);
         LOGGER.debug(MARKER, "Received config sync from server for {}", msg.name());
 
-        if (!ctx.getConnection().isMemoryConnection()) {
-            var cfg = ConfigTracker.fileMap().get(msg.name());
-            if (cfg != null)
-                cfg.acceptSyncedConfig(msg.data());
-        }
+        // TODO [ModuleLoader] Configs are disabled until the new config system is ready
+        //if (!ctx.getConnection().isMemoryConnection()) {
+        //    var cfg = ConfigTracker.fileMap().get(msg.name());
+        //    if (cfg != null)
+        //        cfg.acceptSyncedConfig(msg.data());
+        //}
     }
 }

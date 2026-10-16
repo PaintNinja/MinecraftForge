@@ -48,12 +48,15 @@ class Runs implements Meta {
             if (output != null)
                 sourceSet.resources.with { srcDir output }
 
+            ModuleLoaderLaunch.apply(project)
+
             forgedev.runs.with {
                 final File existing = sourceSet.getResources().getSrcDirs()[0]
 
                 configureEach {
                     it.with {
                         cache.set(project.layout.projectDirectory.dir('runs/cache'))
+                        ModuleLoaderLaunch.configure(project, sourceSet, it.with(sourceSet).run)
                         eclipsePrefix = project.name
 
                         // If we're not forge, we need to get the metadata from the forge project
@@ -82,14 +85,13 @@ class Runs implements Meta {
 
                         options.with {
                             getWorkingDir().set(project.layout.projectDirectory.dir("runs/$name"))
-                            getMainClass().set('net.minecraftforge.bootstrap.ForgeBootstrap')
+                            getMainClass().set('ga.ozli.moduleloader.core.Main')
                             args '--gameDir', '.'
                             jvmArgs '-Djava.net.preferIPv6Addresses=system', '-XX:+UseCompactObjectHeaders', '-XX:StackShadowPages=32'
 
                             //systemProperty 'forge.logging.marker.registries', 'ACCEPT'
                             //systemProperty 'forge.logging.console.level', 'debug'
-                            systemProperty 'bsl.debug', 'true'
-                            systemProperty 'terminal.jline', 'true'
+                            systemProperty 'forge.dev', 'true'
                             systemProperty 'forge.enableGameTest', 'true'
                             systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
                         }
@@ -98,31 +100,30 @@ class Runs implements Meta {
 
                 maybeCreate('client').with {
                     options.with {
-                        args '--launchTarget', 'forge_dev_client',
+                        args '--mainClass', 'net.minecraft.client.main.Main',
                             '--username', 'Dev',
                             '--version', project.name,
                             '--accessToken', '0',
-                            '--userType', 'mojang',
                             '--versionType', 'release'
                     }
                 }
 
                 maybeCreate('server').with {
                     options.with {
-                        args '--launchTarget', 'forge_dev_server'
+                        args '--mainClass', 'net.minecraft.server.Main', 'nogui'
                     }
                 }
 
                 maybeCreate('gameTestServer').with {
                     options.with {
-                        args '--launchTarget', 'forge_dev_server_gametest',
+                        args '--mainClass', 'net.minecraft.gametest.Main',
                             '--uniqueWorld' // Unique world is used so that the world regenerates, as well as the world config isn't influenced by other runs
                     }
                 }
 
                 maybeCreate('data').with {
                     options.with {
-                        args '--launchTarget', 'forge_dev_data',
+                        args '--mainClass', 'net.minecraft.data.Main',
                             '--all',
                             '--existing', existing
                     }
@@ -130,7 +131,7 @@ class Runs implements Meta {
 
                 maybeCreate('clientData').with {
                     options.with {
-                        args '--launchTarget', 'forge_dev_client_data',
+                        args '--mainClass', 'net.minecraft.client.data.Main',
                             '--all',
                             '--existing', existing
                     }

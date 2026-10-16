@@ -43,7 +43,6 @@ import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.resources.Identifier;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.language.IModFileInfo;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -126,10 +125,10 @@ public class ExistingFileHelper {
         }
 
         for (String existingMod : existingMods) {
-            IModFileInfo modFileInfo = ModList.getModFileById(existingMod);
-            if (modFileInfo != null) {
+            var root = ModList.getRoot(existingMod);
+            if (root.isPresent()) {
                 var info = new PackLocationInfo("mod:" + existingMod, Component.literal("data_gen:" + existingMod), PackSource.DEFAULT, Optional.empty());
-                var supplier = new PathResourcesSupplier(modFileInfo.getFile().findResource("/"));
+                var supplier = new PathResourcesSupplier(root.get());
                 add(client, server, info, supplier);
             }
         }

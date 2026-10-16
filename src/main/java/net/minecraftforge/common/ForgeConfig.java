@@ -6,7 +6,6 @@
 package net.minecraftforge.common;
 
 import net.minecraftforge.fml.Logging;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
@@ -163,13 +162,14 @@ public class ForgeConfig {
         SERVER = specPair.getLeft();
     }
 
-    static void onLoad(final ModConfigEvent.Loading configEvent) {
-        LOGGER.debug(Logging.FORGEMOD, "Loaded forge config file {}", configEvent.getConfig().getFileName());
-    }
-
-    static void onFileChange(final ModConfigEvent.Reloading configEvent) {
-        LOGGER.debug(Logging.FORGEMOD, "Forge config just got changed on the file system!");
-    }
+    // TODO [ModuleLoader] Configs are disabled until the new config system is ready
+    //static void onLoad(final ModConfigEvent.Loading configEvent) {
+    //    LOGGER.debug(Logging.FORGEMOD, "Loaded forge config file {}", configEvent.getConfig().getFileName());
+    //}
+//
+    //static void onFileChange(final ModConfigEvent.Reloading configEvent) {
+    //    LOGGER.debug(Logging.FORGEMOD, "Forge config just got changed on the file system!");
+    //}
 
     //General
     //public static boolean disableVersionCheck = false;

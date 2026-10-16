@@ -5,17 +5,16 @@
 
 package net.minecraftforge.event;
 
+import ga.ozli.novamodloader.api.ModuleLoaderMod;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraftforge.eventbus.api.bus.BusGroup;
+import net.minecraftforge.common.util.ModNamespace;
 import net.minecraftforge.eventbus.api.bus.EventBus;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.event.IModBusEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraftforge.eventbus.api.event.MutableEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,13 +34,11 @@ import java.util.stream.Stream;
  * unsafe to access server or level information during handling of this event.
  * </p>
  *
- * <p>This event is fired on the {@linkplain FMLJavaModLoadingContext#getModBusGroup() mod BusGroup},
+ * <p>This event is fired on the {@linkplain BusGroup#DEFAULT default BusGroup},
  * on both {@linkplain LogicalSide logical sides}.</p>
  */
-public final class ModMismatchEvent implements IModBusEvent {
-    public static EventBus<ModMismatchEvent> getBus(BusGroup modBusGroup) {
-        return IModBusEvent.getBus(modBusGroup, ModMismatchEvent.class);
-    }
+public final class ModMismatchEvent extends MutableEvent {
+    public static final EventBus<ModMismatchEvent> BUS = EventBus.create(ModMismatchEvent.class);
 
     /**
      * The level being loaded. Useful for things like {@link net.minecraft.world.level.storage.DimensionDataStorage}
@@ -55,9 +52,9 @@ public final class ModMismatchEvent implements IModBusEvent {
     private final HashMap<String, MismatchedVersionInfo> versionDifferences;
 
     /**
-     * Which mods have specified that they have handled version mismatches.
+     * Which mods have specified that they have handled version mismatches, mapped to the namespace of the mod that handled it.
      */
-    private final HashMap<String, ModContainer> resolved;
+    private final HashMap<String, String> resolved;
 
     @ApiStatus.Internal
     public ModMismatchEvent(LevelStorageSource.LevelDirectory levelDirectory, Map<String, ArtifactVersion> previousVersions, Map<String, ArtifactVersion> missingVersions) {
@@ -65,9 +62,8 @@ public final class ModMismatchEvent implements IModBusEvent {
         this.resolved = new HashMap<>(previousVersions.size());
         this.versionDifferences = new HashMap<>();
         previousVersions.forEach((modId, version) -> versionDifferences.put(modId, new MismatchedVersionInfo(version, ModList
-                .getModContainerById(modId)
-                .map(ModContainer::getModInfo)
-                .map(IModInfo::getVersion)
+                .getVersion(modId)
+                .<ArtifactVersion>map(DefaultArtifactVersion::new)
                 .orElse(null))));
 
         missingVersions.forEach((modId, version) -> versionDifferences.put(modId, new MismatchedVersionInfo(version, null)));
@@ -103,11 +99,12 @@ public final class ModMismatchEvent implements IModBusEvent {
     }
 
     /**
-     * Marks the mod version mismatch as having been resolved safely by the current mod.
+     * Marks the mod version mismatch as having been resolved safely by the given mod.
+     *
+     * @param resolvedBy The entrypoint of the mod that resolved the mismatch
      */
-    public void markResolved(String modId) {
-        final var resolvedBy = ModLoadingContext.get().getContainer();
-        resolved.putIfAbsent(modId, resolvedBy);
+    public void markResolved(ModuleLoaderMod resolvedBy, String modId) {
+        resolved.putIfAbsent(modId, ModNamespace.of(resolvedBy));
     }
 
     /**
@@ -121,7 +118,10 @@ public final class ModMismatchEvent implements IModBusEvent {
         return Optional.ofNullable(this.versionDifferences.get(modid));
     }
 
-    public Optional<ModContainer> getResolver(String modid) {
+    /**
+     * @return The namespace of the mod that resolved the mismatch
+     */
+    public Optional<String> getResolver(String modid) {
         return Optional.ofNullable(this.resolved.get(modid));
     }
 
@@ -146,9 +146,9 @@ public final class ModMismatchEvent implements IModBusEvent {
                 .sorted(Comparator.comparing(MismatchResolutionResult::modid));
     }
 
-    public record MismatchResolutionResult(String modid, MismatchedVersionInfo versionDifference, @Nullable ModContainer resolver) {
+    public record MismatchResolutionResult(String modid, MismatchedVersionInfo versionDifference, @Nullable String resolver) {
         public boolean wasSelfResolved() {
-            return resolver != null && resolver.getModId().equals(modid);
+            return modid.equals(resolver);
         }
     }
 

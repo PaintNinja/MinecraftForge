@@ -5,21 +5,19 @@
 
 package net.minecraftforge.mdk;
 
+import ga.ozli.novamodloader.api.ModuleLoaderMod;
 import net.minecraft.DetectedVersion;
 import net.minecraft.data.metadata.PackMetadataGenerator;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod(Datagen.MOD_ID)
-public class Datagen {
-    static final String MOD_ID = "mdk_datagen";
-
-    public Datagen(FMLJavaModLoadingContext context) {
-        GatherDataEvent.getBus(context.getModBusGroup()).addListener(Datagen::gatherData);
+public class Datagen implements ModuleLoaderMod.Common {
+    public Datagen() {
+        GatherDataEvent.BUS.addListener(event -> {
+            if (event.isFor(this)) gatherData(event);
+        });
     }
 
     private static void gatherData(GatherDataEvent event) {

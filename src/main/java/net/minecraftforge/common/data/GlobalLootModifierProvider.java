@@ -10,7 +10,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
-import cpw.mods.modlauncher.api.LamdbaExceptionUtils;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
@@ -76,12 +75,12 @@ public abstract class GlobalLootModifierProvider implements DataProvider {
         var ops = registries.createSerializationContext(JsonOps.INSTANCE);
         var codec = IGlobalLootModifier.DIRECT_CODEC;
 
-        toSerialize.forEach(LamdbaExceptionUtils.rethrowBiConsumer((name, instance) -> {
+        toSerialize.forEach((name, instance) -> {
             var json = codec.encodeStart(ops, instance).getOrThrow();
             entries.add(Identifier.fromNamespaceAndPath(modid, name));
             Path modifierPath = modifierFolderPath.resolve(name + ".json");
             futuresBuilder.add(DataProvider.saveStable(cache, json, modifierPath));
-        }));
+        });
 
         JsonObject forgeJson = new JsonObject();
         forgeJson.addProperty("replace", this.replace);

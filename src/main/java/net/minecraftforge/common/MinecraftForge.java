@@ -11,11 +11,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.eventbus.api.bus.BusGroup;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.IConfigSpec;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.IModBusEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.DualStackUtils;
 import net.minecraftforge.versions.forge.ForgeVersion;
@@ -26,7 +21,6 @@ import org.apache.logging.log4j.MarkerManager;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class MinecraftForge {
     /**
@@ -35,10 +29,6 @@ public class MinecraftForge {
      *
      * <p>Please refer to the javadocs for {@link EventBusMigrationHelper} for further information and resources on how
      * to properly migrate your mod to the new event system.</p>
-     *
-     * <p>Events marked with {@link IModBusEvent} belong on the
-     * {@linkplain FMLJavaModLoadingContext#getModBusGroup() mod BusGroup} and not on the
-     * {@linkplain BusGroup#DEFAULT default BusGroup}.</p>
      */
     public static final EventBusMigrationHelper EVENT_BUS = EventBusMigrationHelper.INSTANCE;
 
@@ -63,8 +53,6 @@ public class MinecraftForge {
      *                       show when the player clicks the config button for your mod on the mods screen.
      *                       <p>You should call {@link Minecraft#setScreen(Screen)} with the provided mods screen for the
      *                       action of your close button, using {@link Screen#getMinecraft()} to get the client instance.</p>
-     * @see ModLoadingContext#registerExtensionPoint(Class, Supplier)
-     * @see ModLoadingContext#registerConfig(ModConfig.Type, IConfigSpec)
      */
     public static void registerConfigScreen(Function<Screen, Screen> screenFunction) {
         registerConfigScreen((_, modsScreen) -> screenFunction.apply(modsScreen));
@@ -77,13 +65,12 @@ public class MinecraftForge {
      *                       for your mod on the mods screen.
      *                       <p>You should call {@link Minecraft#setScreen(Screen)} with the provided client instance
      *                       and mods screen for the action of your close button.</p>
-     * @see ModLoadingContext#registerExtensionPoint(Class, Supplier)
-     * @see ModLoadingContext#registerConfig(ModConfig.Type, IConfigSpec)
      */
     public static void registerConfigScreen(BiFunction<Minecraft, Screen, Screen> screenFunction) {
-        ModLoadingContext.get().registerExtensionPoint(
-               ConfigScreenHandler.ConfigScreenFactory.class,
-               () -> new ConfigScreenHandler.ConfigScreenFactory(screenFunction)
-        );
+        // TODO [ModuleLoader] Config screen registration, pending the mods screen redesign
+        //ModLoadingContext.get().registerExtensionPoint(
+        //       ConfigScreenHandler.ConfigScreenFactory.class,
+        //       () -> new ConfigScreenHandler.ConfigScreenFactory(screenFunction)
+        //);
     }
 }

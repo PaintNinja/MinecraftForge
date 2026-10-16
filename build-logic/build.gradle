@@ -19,6 +19,7 @@ dependencies {
     implementation plugin('gitversion')
     implementation plugin('changelog')
     implementation plugin('forgedev')
+    implementation plugin('extra-java-module-info')
 }
 
 gradlePlugin {

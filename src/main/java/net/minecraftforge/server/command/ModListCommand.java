@@ -21,14 +21,9 @@ class ModListCommand {
                 .requires(Commands.hasPermission(Commands.LEVEL_ALL))
                 .executes(ctx -> {
                             ctx.getSource().sendSuccess(() -> Component.translatable("commands.forge.mods.list",
-                                    ModList.applyForEachModFile(modFile ->
-                                            // locator - filename : firstmod (version) - numberofmods\n
-                                            String.format(Locale.ROOT, "%s %s : %s (%s) - %d",
-                                                    modFile.getProvider().name().replace(' ', '_'),
-                                                    modFile.getFileName(),
-                                                    modFile.getModInfos().getFirst().getModId(),
-                                                    modFile.getModInfos().getFirst().getVersion(),
-                                                    modFile.getModInfos().size())).
+                                    ModList.getModIds().stream().map(modId ->
+                                            // modid (version)
+                                            String.format(Locale.ROOT, "%s (%s)", modId, ModList.getVersion(modId).orElse("?"))).
                                         collect(Collectors.joining("\n\u2022 ","\n\u2022 ", ""))),
                                     false);
                             return 0;

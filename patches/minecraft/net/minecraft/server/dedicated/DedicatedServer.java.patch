@@ -44,7 +44,7 @@
      }
  
      @Override
-@@ -417,6 +_,13 @@
+@@ -417,6 +_,14 @@
                  LOGGER.error("Interrupted while stopping the management server", e);
              }
          }
@@ -54,7 +54,8 @@
 +            this.dediLanPinger = null;
 +        }
 +
-+        net.minecraftforge.fml.config.ConfigTracker.forceUnload();
++        // TODO [ModuleLoader] Configs are disabled until the new config system is ready
++        //net.minecraftforge.fml.config.ConfigTracker.forceUnload();
      }
  
      @Override

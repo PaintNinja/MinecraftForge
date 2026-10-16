@@ -19,7 +19,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.IArmPoseTransformer;
 import net.minecraftforge.fml.LogicalSide;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -56,8 +55,8 @@ public interface IClientItemExtensions {
     }
 
     /**
-      * This method returns an ArmPose that can be defined using the {@link net.minecraft.client.model.HumanoidModel.ArmPose#create(String, boolean, IArmPoseTransformer)} method.
-      * This allows for creating custom item use animations.
+      * This method returns an ArmPose for the item, such as one of vanilla's or one a mod added with Mixin.
+      * This allows for custom item use animations.
       *
       * @param entityLiving The entity holding the item
       * @param hand         The hand the ArmPose will be applied to

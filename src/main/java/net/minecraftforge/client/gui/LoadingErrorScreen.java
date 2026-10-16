@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-only
  */
 
+/* TODO [ModuleLoader] Show this again once there's a replacement for FML's loading errors and warnings
 package net.minecraftforge.client.gui;
 
 import com.google.common.base.Strings;
@@ -156,3 +157,4 @@ public class LoadingErrorScreen extends ErrorScreen {
 
     }
 }
+*/

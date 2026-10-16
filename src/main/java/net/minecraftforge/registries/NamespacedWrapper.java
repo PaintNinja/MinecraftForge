@@ -84,7 +84,8 @@ class NamespacedWrapper<T> extends MappedRegistry<T> implements ILockableRegistr
         this.registrationInfos.put(key, info);
         this.registryLifecycle = this.registryLifecycle.add(info.lifecycle());
 
-        this.delegate.add(-1, key.identifier(), value);
+        // No owner is known here, so overriding an existing entry through vanilla's Registry.register throws
+        this.delegate.add(-1, key.identifier(), value, null);
 
         return getHolder(key, value);
     }

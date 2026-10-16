@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-only
  */
 
+/* TODO [ModuleLoader] The mod list screen is being replaced, it'll be added back as its own module
 package net.minecraftforge.client.gui;
 
 import java.io.IOException;
@@ -417,7 +418,7 @@ public class ModListScreen extends Screen {
                             }
                         }
                     };
-                    */
+                    * /
 
                     tm.register(LOGO, texture);
                     var size = new Size2i(logo.getWidth(), logo.getHeight());
@@ -457,7 +458,7 @@ public class ModListScreen extends Screen {
         } else {
             lines.add(ForgeI18n.parseMessage("fml.menu.mods.info.securejardisabled"));
         }
-        */
+        * /
 
         if ((vercheck.status().isOutdated()) && !vercheck.changes().isEmpty()) {
             lines.add(null);
@@ -494,3 +495,4 @@ public class ModListScreen extends Screen {
         this.minecraft.gui.setScreen(this.parentScreen);
     }
 }
+*/

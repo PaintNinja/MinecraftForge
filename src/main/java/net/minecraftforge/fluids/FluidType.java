@@ -40,7 +40,7 @@ import net.minecraftforge.common.SoundAction;
 import net.minecraftforge.common.SoundActions;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.data.loading.DatagenModLoader;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
@@ -830,7 +830,7 @@ public class FluidType {
 
     private void initClient() {
         // Minecraft instance isn't available in datagen, so don't call initializeClient if in datagen
-        if (FMLEnvironment.dist == Dist.CLIENT && !FMLLoader.getLaunchHandler().isData()) {
+        if (FMLEnvironment.dist == Dist.CLIENT && !DatagenModLoader.isRunningDataGen()) {
             initializeClient(properties -> {
                 if (properties == this)
                     throw new IllegalStateException("Don't extend IFluidTypeRenderProperties in your fluid type, use an anonymous class instead.");

@@ -5,16 +5,17 @@
 
 package net.minecraftforge.data.event;
 
-import cpw.mods.modlauncher.api.LamdbaExceptionUtils;
+import ga.ozli.novamodloader.api.ModuleLoaderMod;
 import net.minecraft.DetectedVersion;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.eventbus.api.bus.EventBus;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.event.IModBusEvent;
+import net.minecraftforge.common.util.ModNamespace;
+import net.minecraftforge.eventbus.api.event.MutableEvent;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,25 +27,32 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class GatherDataEvent implements IModBusEvent {
-    public static EventBus<GatherDataEvent> getBus(BusGroup modBusGroup) {
-        return IModBusEvent.getBus(modBusGroup, GatherDataEvent.class);
-    }
+public final class GatherDataEvent extends MutableEvent {
+    public static final EventBus<GatherDataEvent> BUS = EventBus.create(GatherDataEvent.class);
 
     private final DataGenerator dataGenerator;
     private final DataGeneratorConfig config;
     private final ExistingFileHelper existingFileHelper;
-    private final ModContainer modContainer;
+    private final String modId;
 
-    public GatherDataEvent(final ModContainer mc, final DataGenerator dataGenerator, final DataGeneratorConfig dataGeneratorConfig, ExistingFileHelper existingFileHelper) {
-        this.modContainer = mc;
+    public GatherDataEvent(final String modId, final DataGenerator dataGenerator, final DataGeneratorConfig dataGeneratorConfig, ExistingFileHelper existingFileHelper) {
+        this.modId = modId;
         this.dataGenerator = dataGenerator;
         this.config = dataGeneratorConfig;
         this.existingFileHelper = existingFileHelper;
     }
 
-    public ModContainer getModContainer() {
-        return this.modContainer;
+    /** @return The id of the mod this event gathers data for */
+    public String getModId() {
+        return this.modId;
+    }
+
+    /**
+     * This event is posted once per mod, and every listener receives each one. Check this before adding providers.
+     * @return If this event gathers data for the given mod
+     */
+    public boolean isFor(ModuleLoaderMod mod) {
+        return this.modId.equals(ModNamespace.of(mod));
     }
 
     public Collection<Path> getInputs() { return this.config.getInputs(); }
@@ -109,12 +117,16 @@ public final class GatherDataEvent implements IModBusEvent {
         public void runAll() {
             Map<Path, List<DataGenerator>> paths = generators.stream().collect(Collectors.groupingBy(gen -> gen.getPackOutput().getOutputFolder(), LinkedHashMap::new, Collectors.toList()));
 
-            paths.values().forEach(LamdbaExceptionUtils.rethrowConsumer(lst -> {
+            for (var lst : paths.values()) {
                 DataGenerator parent = lst.get(0);
                 for (int x = 1; x < lst.size(); x++)
                     lst.get(x).getProvidersView().forEach((_, provider) -> parent.addProvider(true, provider));
-                parent.run();
-            }));
+                try {
+                    parent.run();
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            }
         }
     }
 }

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-only
  */
 
+/* TODO [ModuleLoader] The mod list screen is being replaced, it'll be added back as its own module
 package net.minecraftforge.client.gui.widget;
 
 import org.jspecify.annotations.Nullable;
@@ -54,7 +55,7 @@ public class ModListWidget extends ObjectSelectionList<ModListWidget.ModEntry> {
         int right = left + entry.getWidth() - widthOffset;
         int bottom = top + entry.getHeight();
         gui.fill(left,     top - 2, right,     bottom + 2, color);
-        gui.fill(left + 1, top - 1, right - 1, bottom + 1, /*backgroundColor*/ 0xFF000000);
+        gui.fill(left + 1, top - 1, right - 1, bottom + 1, /*backgroundColor* / 0xFF000000);
     }
 
     public void refreshList() {
@@ -117,3 +118,4 @@ public class ModListWidget extends ObjectSelectionList<ModListWidget.ModEntry> {
         }
     }
 }
+*/

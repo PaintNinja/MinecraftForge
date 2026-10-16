@@ -11,12 +11,14 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.ExternalModuleDependencyBundle
 import org.gradle.api.artifacts.MinimalExternalModuleDependency
+import org.gradle.api.file.FileCollection
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.jvm.tasks.Jar
+import org.jspecify.annotations.Nullable
 
 import javax.inject.Inject
 
@@ -126,6 +128,25 @@ abstract class ConventionExtension implements Meta {
         this.runs.test(mods, output)
         config.execute(this.runs)
         return getRuns()
+    }
+
+    private TaskProvider<Jar> gameJar = null
+    private FileCollection gameJarReplaces = null
+    /**
+     * Sets the jar that holds the game module for runs launched through ModuleLoader, in all projects.
+     *
+     * @param jar      The merged Minecraft + Forge jar
+     * @param replaces The files the jar replaces on run classpaths, such as Forge's output
+     */
+    void gameJar(TaskProvider<Jar> jar, Object... replaces) {
+        this.gameJar = jar
+        this.gameJarReplaces = this.project.files(replaces)
+    }
+    @Nullable TaskProvider<Jar> getGameJar() {
+        return this.gameJar
+    }
+    @Nullable FileCollection getGameJarReplaces() {
+        return this.gameJarReplaces
     }
     // endregion
 

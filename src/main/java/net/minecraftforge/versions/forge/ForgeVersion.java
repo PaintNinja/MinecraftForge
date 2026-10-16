@@ -6,12 +6,9 @@
 package net.minecraftforge.versions.forge;
 
 import net.minecraftforge.fml.Logging;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.VersionChecker;
 import net.minecraftforge.fml.loading.JarVersionLookupHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 
 public final class ForgeVersion {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -41,15 +38,7 @@ public final class ForgeVersion {
         return forgeVersion;
     }
 
-    public static VersionChecker.Status getStatus() {
-        return VersionChecker.getResult(ModList.getModFileById(MOD_ID).getMods().getFirst()).status();
-    }
-
-    @Nullable
-    public static String getTarget() {
-        VersionChecker.CheckResult res = VersionChecker.getResult(ModList.getModFileById(MOD_ID).getMods().getFirst());
-        return res.target() == null ? "" : res.target().toString();
-    }
+    // TODO [ModuleLoader] Bring back getStatus() and getTarget() once VersionChecker is reworked
 
     public static String getSpec() {
         return forgeSpec;

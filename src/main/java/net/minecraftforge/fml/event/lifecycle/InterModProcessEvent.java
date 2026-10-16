@@ -5,11 +5,8 @@
 
 package net.minecraftforge.fml.event.lifecycle;
 
-import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.eventbus.api.bus.EventBus;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingStage;
-import net.minecraftforge.fml.event.IModBusEvent;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Predicate;
 
@@ -27,11 +24,8 @@ import java.util.function.Predicate;
  * @see #getIMCStream(Predicate)
  */
 public final class InterModProcessEvent extends ParallelDispatchEvent {
-    public static EventBus<InterModProcessEvent> getBus(BusGroup modBusGroup) {
-        return IModBusEvent.getBus(modBusGroup, InterModProcessEvent.class);
-    }
+    public static final EventBus<InterModProcessEvent> BUS = EventBus.create(InterModProcessEvent.class);
 
-    public InterModProcessEvent(final ModContainer container, final ModLoadingStage stage) {
-        super(container, stage);
-    }
+    @ApiStatus.Internal
+    public InterModProcessEvent() {}
 }

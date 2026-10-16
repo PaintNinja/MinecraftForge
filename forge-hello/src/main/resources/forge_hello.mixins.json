@@ -1,0 +1,11 @@
+{
+    "required": true,
+    "minVersion": "0.8.7",
+    "package": "net.minecraftforge.hello.mixin",
+    "mixins": [
+        "MinecraftServerMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

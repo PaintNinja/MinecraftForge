@@ -1,0 +1,16 @@
+plugins {
+    id 'net.minecraftforge.forge.build.convention'
+}
+
+gradleutils.displayName = 'Forge Runtime Transformers'
+description = 'ModuleLoader class file transformers for Forge. ModuleLoader puts modules that provide a ClassFileTransformer into their own layer, which is loaded before the game.'
+
+dependencies {
+    compileOnly(libs.moduleloader.core) { exclude group: 'cpw.mods' }
+    compileOnly(libs.gson)
+}
+
+// The root project generates coremods/finalize_spawn_targets.json from Minecraft's classes
+tasks.named('processResources') {
+    dependsOn rootProject.tasks.named('findFinalizeSpawnTargets')
+}

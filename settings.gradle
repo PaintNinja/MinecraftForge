@@ -17,16 +17,12 @@ plugins {
 
 rootProject.name = 'forge'
 
-include 'fmlloader'
-include 'fmlcore'
-include 'mclanguage'
-include 'javafmllanguage'
-include 'lowcodelanguage'
-include 'fmlearlydisplay'
-include 'forge-transformers'
-include 'forge-examiner'
+// The FML projects (fmlloader, fmlcore, mclanguage, javafmllanguage, lowcodelanguage, fmlearlydisplay,
+// forge-transformers, forge-examiner) have been replaced by ModuleLoader. Their sources are kept for reference while porting.
 include 'forge-tests'
 include 'forge-mdk'
+include 'forge-hello'
+include 'forge-runtime-transformers'
 
 enableFeaturePreview 'TYPESAFE_PROJECT_ACCESSORS'
 

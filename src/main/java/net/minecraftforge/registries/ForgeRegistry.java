@@ -33,7 +33,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.tags.TagKey;
 import net.minecraftforge.common.util.LogMessageAdapter;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.registries.tags.ITagManager;
 import org.apache.commons.lang3.Validate;
 
@@ -129,13 +128,15 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
     }
 
     @Override
-    public void register(String key, V value) {
-        register(GameData.checkPrefix(key, true), value);
+    public void register(Identifier key, V value) {
+        add(-1, key, value, null);
     }
 
-    @Override
-    public void register(Identifier key, V value) {
-        add(-1, key, value);
+    /**
+     * @param owner The namespace of the mod registering the value, needed to tell apart mods overriding the same entry
+     */
+    void register(String owner, Identifier key, V value) {
+        add(-1, key, value, owner);
     }
 
     @Override
@@ -359,12 +360,6 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
         add(id, key, value, key.getNamespace());
     }
 
-    int add(int id, Identifier key, V value) {
-        @SuppressWarnings("removal")
-        final String owner = ModLoadingContext.get().getActiveNamespace();
-        return add(id, key, value, owner);
-    }
-
     int add(int id, Identifier key, V value, String owner) {
         Preconditions.checkNotNull(key, "Can't use a null-name for the registry, object %s.", value);
         Preconditions.checkNotNull(value, "Can't add null-object to the registry, name %s.", key);
@@ -386,7 +381,7 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
             if (!this.allowOverrides)
                 throw new IllegalArgumentException(String.format(Locale.ENGLISH, "The name %s has been registered twice, for %s and %s.", key, getRaw(key), value));
             if (owner == null)
-                throw new IllegalStateException(String.format(Locale.ENGLISH, "Could not determine owner for the override on %s. Value: %s", key, value));
+                throw new IllegalStateException(String.format(Locale.ENGLISH, "Could not determine owner for the override on %s. Value: %s. Overrides need registering with their mod, through DeferredRegister.register(mod) or RegisterEvent.register(mod, ...)", key, value));
             LOGGER.debug(REGISTRIES,"Registry {} Override: {} {} -> {}", this.name, key, oldEntry, value);
             idToUse = this.getID(oldEntry);
         }
@@ -597,7 +592,7 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
             List<V> overrides = new ArrayList<>(from.overrides.get(entry.getKey()));
             int id = from.getID(entry.getKey());
             if (overrides.isEmpty()) {
-                int realId = add(id, entry.getKey(), entry.getValue());
+                int realId = add(id, entry.getKey(), entry.getValue(), entry.getKey().getNamespace());
                 if (id != realId && id != -1) {
                     LOGGER.warn(REGISTRIES,"Registry {}: Object did not get ID it asked for. Name: {} Expected: {} Got: {}", this.name, entry.getKey(), id, realId);
                     errored = true;
@@ -966,7 +961,7 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
 
                 missing.removeInt(remap.key);
                 //I don't think this will work, but I dont think it ever worked.. the item is already in the map with a different id... we want to fix that..
-                int realId = this.add(remap.id, newName, remap.target);
+                int realId = this.add(remap.id, newName, remap.target, newName.getNamespace());
                 if (realId != remap.id)
                     LOGGER.warn(REGISTRIES, "Registered object did not get ID it asked for. Name: {} Expected: {} Got: {}", newName, remap.id, realId);
                 this.addAlias(remap.key, newName);

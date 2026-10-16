@@ -5,12 +5,9 @@
 
 package net.minecraftforge.fml.event.lifecycle;
 
-import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.eventbus.api.bus.EventBus;
+import org.jetbrains.annotations.ApiStatus;
 import net.minecraftforge.eventbus.api.event.characteristic.SelfDestructing;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingStage;
-import net.minecraftforge.fml.event.IModBusEvent;
 
 /**
  * This is a mostly internal event fired to mod containers that indicates that loading is complete. Mods should not
@@ -19,11 +16,8 @@ import net.minecraftforge.fml.event.IModBusEvent;
  * @author cpw
  */
 public final class FMLLoadCompleteEvent extends ParallelDispatchEvent implements SelfDestructing {
-    public static EventBus<FMLLoadCompleteEvent> getBus(BusGroup modBusGroup) {
-        return IModBusEvent.getBus(modBusGroup, FMLLoadCompleteEvent.class);
-    }
+    public static final EventBus<FMLLoadCompleteEvent> BUS = EventBus.create(FMLLoadCompleteEvent.class);
 
-    public FMLLoadCompleteEvent(final ModContainer container, final ModLoadingStage stage) {
-        super(container, stage);
-    }
+    @ApiStatus.Internal
+    public FMLLoadCompleteEvent() {}
 }

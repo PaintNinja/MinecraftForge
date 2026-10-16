@@ -11,7 +11,6 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.eventbus.api.bus.EventBus;
 import net.minecraftforge.eventbus.api.event.MutableEvent;
-import net.minecraftforge.fml.ModLoader;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
@@ -68,10 +67,8 @@ public final class AddReloadListenerEvent extends MutableEvent {
 
         @Override
         public CompletableFuture<Void> reload(SharedState state, Executor backgroundExecutor, PreparationBarrier stage, Executor gameExecutor) {
-            if (ModLoader.isLoadingStateValid())
-                return wrapped.reload(state, backgroundExecutor, stage, gameExecutor);
-            else
-                return CompletableFuture.completedFuture(null);
+            // FML skipped reloading after a mod loading error, those now crash the game instead
+            return wrapped.reload(state, backgroundExecutor, stage, gameExecutor);
         }
 
         @Override

@@ -8,7 +8,7 @@
  
      public TitleScreen() {
          this(false);
-@@ -114,11 +_,15 @@
+@@ -114,11 +_,16 @@
          int copyrightX = this.width - copyrightWidth - 2;
          int spacing = 24;
          int topPos = this.height / 4 + 48;
@@ -17,30 +17,23 @@
              topPos = this.createDemoMenuOptions(topPos, 24);
          } else {
              topPos = this.createNormalMenuOptions(topPos, 24);
-+            modButton = this.addRenderableWidget(Button.builder(Component.translatable("fml.menu.mods"), button -> this.minecraft.gui.setScreen(new net.minecraftforge.client.gui.ModListScreen(this)))
-+                .pos(this.width / 2 - 100, topPos).size(98, 20).build());
++            // TODO [ModuleLoader] Mods button, the mod list screen is being replaced
++            //modButton = this.addRenderableWidget(Button.builder(Component.translatable("fml.menu.mods"), button -> this.minecraft.gui.setScreen(new net.minecraftforge.client.gui.ModListScreen(this)))
++            //    .pos(this.width / 2 - 100, topPos).size(98, 20).build());
          }
 +        modUpdateNotification = net.minecraftforge.client.gui.TitleScreenModUpdateIndicator.init(this, modButton);
  
          int numberOfButtons = 3;
          int currentButton = 0;
-@@ -199,7 +_,7 @@
-         }).bounds(this.width / 2 - 100, var7 = topPos + spacing, 200, 20).tooltip(tooltip).build()).active = multiplayerAllowed;
-         this.addRenderableWidget(
-                 Button.builder(Component.translatable("menu.online"), var1 -> this.minecraft.gui.setScreen(new RealmsMainScreen(this)))
--                    .bounds(this.width / 2 - 100, topPos = var7 + spacing, 200, 20)
-+                    .bounds(this.width / 2 + 2, topPos = var7 + spacing, 98, 20)
-                     .tooltip(tooltip)
-                     .build()
-             )
-@@ -323,9 +_,18 @@
+@@ -323,9 +_,19 @@
              versionString = versionString + I18n.get("menu.modded");
          }
  
 -        graphics.text(this.font, versionString, 2, this.height - 10, ARGB.white(widgetFade));
 +        final float widgetFade_f = widgetFade;
++        // Starts one line up, ModuleLoader draws its own branding on the bottom line
 +        net.minecraftforge.internal.BrandingControl.forEachLine(true, true, (brd, brdline) ->
-+            graphics.text(this.font, brd, 2, this.height - ( 10 + brdline * (this.font.lineHeight + 1)), ARGB.color(widgetFade_f, -1))
++            graphics.text(this.font, brd, 2, this.height - ( 10 + (brdline + 1) * (this.font.lineHeight + 1)), ARGB.color(widgetFade_f, -1))
 +        );
 +
 +        net.minecraftforge.internal.BrandingControl.forEachAboveCopyrightLine((brd, brdline) ->

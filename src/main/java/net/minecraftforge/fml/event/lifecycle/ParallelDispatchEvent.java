@@ -5,31 +5,23 @@
 
 package net.minecraftforge.fml.event.lifecycle;
 
-import net.minecraftforge.fml.DeferredWorkQueue;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingStage;
-
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+/**
+ * Lifecycle events that FML dispatched to mods in parallel. They're now posted on the main thread, so work
+ * enqueued here runs immediately.
+ */
+// TODO [ModuleLoader] Remove enqueueWork once these become service loaded interfaces called in parallel
 public abstract class ParallelDispatchEvent extends ModLifecycleEvent {
-    private final ModLoadingStage modLoadingStage;
-
-    protected ParallelDispatchEvent(final ModContainer container, final ModLoadingStage stage) {
-        super(container);
-        this.modLoadingStage = stage;
-    }
-
-    private Optional<DeferredWorkQueue> getQueue() {
-        return DeferredWorkQueue.lookup(Optional.of(modLoadingStage));
-    }
+    protected ParallelDispatchEvent() {}
 
     public CompletableFuture<Void> enqueueWork(Runnable work) {
-        return getQueue().map(q->q.enqueueWork(getContainer(), work)).orElseThrow(()->new RuntimeException("No work queue found!"));
+        work.run();
+        return CompletableFuture.completedFuture(null);
     }
 
     public <T> CompletableFuture<T> enqueueWork(Supplier<T> work) {
-        return getQueue().map(q->q.enqueueWork(getContainer(), work)).orElseThrow(()->new RuntimeException("No work queue found!"));
+        return CompletableFuture.completedFuture(work.get());
     }
 }
